@@ -1,0 +1,12 @@
+name: AttDecMaking
+title: AttDecMaking
+username: dgraetz
+account: dgraetz
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 16469195
+bundleId: 11483353
+url: https://dgraetz.shinyapps.io/AttDecMaking/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
