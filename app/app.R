@@ -1,5 +1,3 @@
-
-
 library(bslib)
 library(shiny)
 library(tidyverse)
@@ -21,28 +19,137 @@ parse_nums <- function(txt) {
 # Define UI for application that draws a histogram
 ui <- page_navbar(
   
-  header = tagList(
-    tags$div(
-      style = "background-color: #000; color: #fff; width: 100%; z-index: 2000;",
-      img(src = "cdl_logo.svg", height = "35px"),
-      span("Cognitive Dynamics Lab", style = "margin-left: 15px; font-weight: bold; text-transform: uppercase;")
-    ),
-    # This adds a small gap so the nav bar doesn't touch the black bar
-    tags$style(HTML(".navbar { border-top: 1px solid #eee; }"))
+  id = "main_nav",
+  
+  header = tags$div(
+    style = "
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 55px; 
+      background-color: #000; 
+      color: #fff; 
+      z-index: 9999; 
+      display: flex; 
+      align-items: center; 
+      padding: 0 30px;
+    ",
+    img(src = "cdl_logo.svg", height = "35px"),
+    span("Cognitive Dynamics Lab", 
+         style = "margin-left: 15px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;")
   ),
   
-  
   title = "Attentional Decision-Making Lab",
+  
+  # 2. CSS OVERRIDES (To handle the gap created by the fixed header)
+  tags$head(
+    tags$style(HTML("
+      /* Remove the default padding Shiny adds for the fixed-top navbar */
+      body { 
+        padding-top: 0 !important; 
+      }
+
+      /* Push the Lux Navbar down so it sits below the black bar */
+      .navbar.fixed-top { 
+        top: 55px !important; /* This must match the 'height' of your header div */
+      }
+
+      /* Ensure the rest of the app content starts after the two headers */
+      .bslib-page-navbar { 
+        margin-top: 55px; 
+      }
+
+      /* --- YOUR EXISTING ACCORDION CSS --- */
+      .accordion-button {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        opacity: 1 !important;
+        --bs-accordion-btn-color: #ffffff !important;
+        --bs-accordion-active-color: #ffffff !important;
+      }
+      .accordion-button.collapsed, .accordion-button:not(.collapsed) {
+        background-color: #000000 !important; 
+        color: #ffffff !important;           
+      }
+      .accordion-button::after {
+        filter: brightness(0) invert(1) !important;
+        opacity: 1 !important;
+      }
+      .accordion-button:focus, .accordion-button:active {
+        color: #ffffff !important;
+        opacity: 1 !important;
+        background-color: #000000 !important;
+        box-shadow: none !important;
+        border-color: transparent !important;
+      }
+      /* Force bold text to be much heavier for visibility in Lux */
+      strong, b {
+        font-weight: 900 !important; 
+        color: #000000 !important; /* Ensures it's pure black, not dark grey */
+      }
+      
+    ")),
+    tags$script(HTML("
+    function goToTab(tabName) {
+      // 1. Tell Shiny the value has changed
+      Shiny.setInputValue('main_nav', tabName);
+      
+      // 2. Tell Bootstrap to physically show the tab
+      var tabTrigger = document.querySelector('button[data-value=\"' + tabName + '\"]');
+      if (tabTrigger) {
+        bootstrap.Tab.getOrCreateInstance(tabTrigger).show();
+      }
+      
+      // 3. Scroll to the top of the page
+      window.scrollTo(0, 0);
+    }
+    
+
+  "))
+  ),
+  
   theme = bs_theme(
     version = 5,
     bootswatch = "lux",
     primary = "#2c3e50"
   ),
   
-  # nav_panel("Welcome",
-  #           icon = icon("house"),
-  #           "Welcome"
-  # ),
+  nav_panel("Welcome",
+            icon = icon("house"),
+            markdown("
+                     # Welcome
+                     ### Decision-Making about our Attention
+                     
+                     We are interested in how our cognitive system controls where to focus attention. The answer to this question will depend on the context, but our approach to this question is through the lens of rational decision-making. 
+                     
+                     For this project, I am highlighting one context in which humans decide on an attentional checking policy - and our research has found that they consider the costs and benefits of possible strategies at least to some degree to make a decision.  
+                     
+                     #### Decision Variables to consider
+                     When faced with an ambiguous task to which the response rules may change over time, how frequently should we check cues that reveal the task rule? For example, when completing a time-limited, open-book exam, how do we make decisions about when to check out notes? This should depend on at least the following context and individual variables:
+                     * __Payoff for correct responses:__ If a question is worth a lot of points, it's more important to get it right, making checking _more_ adaptive.
+                     * __Uncertainty__: If you're unsure about the question (i. e., more liekly to make an error), it may be _more_ adaptive to go and check for the correct response.
+                     * __Time it takes to scramble for the answer:__ If you're running out of time and the information you need is in a moving box in the basement, it might take too long to check the answer, making checking more costly, and, _less_ adaptive.
+                     * __Your response speed__: If you need longer to respond to an individual question, then it's more important to get the few questions you can tackle right. When the time cost for checking remains constant, slower reaction times make it *more* adaptive to check.
+                     
+                     These considerations transfer to a wide range of scenarios, that all have in common that decisions must be made between attenting to a primary task and relevant information in the environment (e. g., navigating a new city and checking the GPS, giving a speech and checking notes, cooking and checking a recipe, making a purchase and comparing prices etc.)
+                     
+                     #### Computational Model and Simulations
+                     
+                     We have developed a __computational model__ and __Monte-Carlo simulation__ that allows us to calculate the payoff for different attentional strategies. From a rational decision-making perspective, humans should select an attentional strategy that aligns with the maxmimum payoff. However, as you can see under the Computation/Simulation Lab, many contexts yield an optimality curve that is fairly broad, i. e., a function where a realtively wide range of checking strategies come relatively close to the optimum. 
+                     
+                     ### This website
+                     
+                     The goal of this website is to showcase my work. 
+                     * Under the __Computation/Simulation Lab__ section, you can explore how manipulating the different parameters affect the attentional decision-making landscape. 
+    
+                     * In the __Empirical Findings__ tab, you can read about the experiments we have conducted and to which degree empirical checking rates collected from human subjects line up with the predicitons from this computational model.
+                     * Read more about the team in the __People__ tab. 
+                     
+                     ### 
+                     
+                     ")
+  ),
   
   nav_panel(
     title = "Computation/Simulation Lab",
@@ -59,17 +166,57 @@ ui <- page_navbar(
           accordion_panel(
             title = "Timing & Probabilities",
             icon = icon("clock"),
-            textInput("baseline", "Baseline RT (comma separated, positive)", value = "1"),
-            textInput("checkrt", "Check RT (comma separated, positive)", value = "1.5"),
-            textInput("switchp", "P(Switch) (comma separated, 0-1)", value = "0.05"),
-            textInput("iti", "ITI", value = "0.1")
+            span(
+              "Baseline RT ",
+              tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
+                      "The expected response time when the participant does not perform a check.")
+            ),
+            textInput("baseline", NULL, value = "1"),
+            
+            span(
+              "Check RT (comma separated, positive)",
+              tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
+                      "The expected response time when the participant does perform a check.")
+            ),
+            textInput("checkrt", NULL, value = "1.5"),
+            
+            span(
+              "P(Switch) (comma separated, positive)",
+              tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
+                      "The trial-by-trial probabilty that the task switches.")
+            ),
+            textInput("switchp", NULL, value = "0.05"),
+            
+            span(
+              "ITI (comma separated, positive)",
+              tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
+                      "The time interval in between trials. Modulates the rate of task completion.")
+            ),
+            textInput("iti", NULL, value = "0.1")
           ),
           accordion_panel(
             "Rewards & Environment",
             icon = icon("dollar-sign"),
-            textInput("win", "Win Value", value = "1"),
-            textInput("loss", "Loss Value", value = "-1"),
-            textInput("ttime", "Block Duration", value = "150")
+            span(
+              "Win Value",
+              tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
+                      "The win amount per correctly completed trial.")
+            ),
+            textInput("win", NULL, value = "1"),
+            
+            span(
+              "Loss Value",
+              tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
+                      "The loss amount per incorrect trial.")
+            ),
+            textInput("loss", NULL, value = "-1"),
+            
+            span(
+              "Block Duration",
+              tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
+                      "The total duration per block.")
+            ),
+            textInput("ttime", NULL, value = "120")
           )
         ),
         
@@ -115,7 +262,7 @@ ui <- page_navbar(
             plotlyOutput("cor_plot", height = "500px")
           ),
           #dataTableOutput("cond_table2")
-          div(DT::dataTableOutput("cond_table2"), style = "font-size: 15%; width: 35%")
+          DT::dataTableOutput("cond_table2", width = "100%", height = "10%")
         ),
         
         
@@ -132,14 +279,107 @@ ui <- page_navbar(
             )
   ),
   
-  nav_panel("About",
-            icon = icon("info-circle"),
-            "About content"
-  ),
   
   nav_panel("People",
             icon = icon("user-group"),
-            "People content"
+            
+            tags$h3("People", 
+                    style = "text-transform: uppercase; font-weight: 150; letter-spacing: 2px; margin-bottom: 40px;"),
+            
+            
+            # --- Profile Row 1: Dominik ---
+            layout_columns(
+              col_widths = c(3, 9),
+              # The Photo Container
+              tags$div(
+                tags$img(src = "Dominik.jpg", 
+                         style = "width: 150px; height: 150px; object-fit: cover; border-radius: 50%; border: 2px solid #eee; object-position: 50% 10%;"),
+                style = "display: flex; flex-direction: column; align-items: center; gap: 15px;",
+
+                
+                tags$div(
+                  style = "display: flex; gap: 15px; font-size: 1.2rem;",
+                # LinkedIn Link
+                  tags$a(
+                    href = "https://www.linkedin.com/in/dgraetz", 
+                    target = "_blank",
+                    icon("linkedin"),
+                    style = "color: #0077b5; text-decoration: none;" # LinkedIn Blue
+                  ),
+                  
+                  # ResearchGate Link
+                  tags$a(
+                    href = "https://www.researchgate.net/profile/Dominik-Graetz", 
+                    target = "_blank",
+                    icon("researchgate"),
+                    style = "color: #00ccbb; text-decoration: none;" # ResearchGate Teal
+                  ),
+                  
+                  # Email Link (Optional but helpful)
+                  tags$a(
+                    href = "mailto:dgrtz@uoregon.edu", 
+                    icon("envelope"),
+                    style = "color: #343a40; text-decoration: none;" # Dark Grey
+                  )
+                ),
+              ),
+              # The Text Content
+              markdown("
+#### Dominik Graetz
+*Doctoral Candidate*
+
+Dominik is a researcher specialized in modeling attentional decision-making. 
+He developed the simulation framework powering this application. 
+
+His current work focuses on empirical research on top-down controlled, bottom-up-driven, and context-dependent human attention.
+    ")
+            ),
+            
+            
+            
+            # --- Profile Row 2: Ulrich Mayr ---
+            layout_columns(
+              col_widths = c(3, 9), # Smaller column for photo, larger for text
+              # The Photo Container
+              tags$div(
+                tags$img(src = "Ulrich.png", 
+                         style = "width: 150px; height: 150px; object-fit: cover; border-radius: 50%; border: 2px solid #eee; object-position: 90% 20%;"),
+                style = "display: flex; flex-direction: column; align-items: center; gap: 15px;",
+                
+                
+                tags$div(
+                  style = "display: flex; gap: 15px; font-size: 1.2rem;",
+            
+                  # ResearchGate Link
+                  tags$a(
+                    href = "https://www.researchgate.net/profile/Ulrich-Mayr", 
+                    target = "_blank",
+                    icon("researchgate"),
+                    style = "color: #00ccbb; text-decoration: none;" # ResearchGate Teal
+                  ),
+                  
+                  # Email Link (Optional but helpful)
+                  tags$a(
+                    href = "mailto:mayr@uoregon.edu", 
+                    icon("envelope"),
+                    style = "color: #343a40; text-decoration: none;" # Dark Grey
+                  )
+                ),
+              ),
+              # The Text Content
+              markdown("
+#### Ulrich Mayr
+*Principal Investigator*
+
+Ulrich Mayr is a **Professor of Psychology**. His research focuses on the 
+architecture and developmental trajectory of executive control processes, 
+as well as the intersection of **attention** and **decision-making**. 
+
+He leads the *Cognitive Dynamics Lab* in exploring how humans navigate complex 
+task environments.
+    ")
+            ),
+          
   )
 )
 
@@ -195,7 +435,8 @@ server <- function(input, output) {
       unnest(predictions) %>%
       group_by(cond) %>%
       mutate(reward_at_opt = max(earnings),
-             rel_reward = earnings / reward_at_opt) %>%
+             rel_reward = earnings / reward_at_opt,
+             is_max = ifelse(rel_reward == 1, 1, 0)) %>%
       ungroup()
     
   })
@@ -210,6 +451,7 @@ server <- function(input, output) {
       
       plt <- plt +
         geom_line(aes(x = probabilities, y = rel_reward, group = cond, color = color))+
+        geom_point(data = computation_results %>% filter(is_max == 1), aes(x = probabilities, y = rel_reward, group = cond, color = color), size = 3, shape = 23)+
         labs(x = "Check Rate",
              y = "Relative reward")
       
@@ -217,6 +459,7 @@ server <- function(input, output) {
       
       plt <- plt +
         geom_line(aes(x = probabilities, y = earnings, group = cond, color = color))+
+        geom_point(data = computation_results %>% filter(is_max == 1), aes(x = probabilities, y = rel_reward, group = cond, color = color), size = 3, shape = 23)+
         labs(x = "Check Rate",
              y = "Absolute reward")
       
@@ -266,7 +509,9 @@ server <- function(input, output) {
         )
       ) %>%
       ungroup() %>%
-      unnest(predictions)
+      unnest(predictions) %>%
+      group_by(cond) %>%
+      mutate(is_max = ifelse(rel_reward == 1, 1, 0))
     
   })
   
@@ -282,6 +527,7 @@ server <- function(input, output) {
       
       plt <- plt +
         geom_line(aes(x = CheckP, y = rel_reward, group = cond, color = color))+
+        geom_point(data = simulation_results %>% filter(is_max == 1), aes(x = CheckP, y = rel_reward, group = cond, color = color), size = 3, shape = 23)+
         labs(x = "Check Rate",
              y = "Relative reward")
       
@@ -289,6 +535,7 @@ server <- function(input, output) {
       
       plt <- plt +
         geom_line(aes(x = CheckP, y = final_reward, group = cond, color = color))+
+        geom_point(data = simulation_results %>% filter(is_max == 1), aes(x = CheckP, y = rel_reward, group = cond, color = color), size = 3, shape = 23)+
         labs(x = "Check Rate",
              y = "Absolute reward")
       
@@ -352,7 +599,7 @@ server <- function(input, output) {
       group_by(cond) %>%
       filter(earnings == reward_at_opt) %>%
       ungroup() %>%
-      select(-reward_at_opt, -rel_reward, -cond) %>%
+      select(-reward_at_opt, -rel_reward, -cond, -is_max) %>%
       relocate(color, baseline, checkrt, switchp, win, loss, iti, ttime, probabilities, earnings) %>%
       mutate(earnings = round(earnings, 2),
              probabilities = round(probabilities, 2)) %>%
