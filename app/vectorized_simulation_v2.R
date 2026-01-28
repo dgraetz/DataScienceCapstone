@@ -33,7 +33,8 @@ run_IE_sim <- function(SwitchP,
                        CheckP = seq(0, 1, 0.01),
                        reps = 100,
                        quiet = TRUE,
-                       guess = 0){
+                       guess = 0,
+                       seed = 04261997){
   
   # SwitchP = 0.1
   # ITI = 0.2
@@ -60,7 +61,7 @@ run_IE_sim <- function(SwitchP,
   
   #Start an Experiment
   
-  set.seed(04272024)
+  set.seed(seed)
   
   # exp <- data.frame(
   #   Block = rep(1:(reps*length(SwitchP)*length(CheckP)*Check_p_reps), each = Trials) ,
