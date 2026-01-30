@@ -3,6 +3,7 @@
 #fix background color of scenario selector
 #tooltips for the sidetask
 #include equations
+#would be nice to highlight columns with different input values
 
 
 library(bslib)
@@ -19,9 +20,36 @@ source("vectorized_simulation_v2.R")
 #this transforms from text to numeric
 parse_nums <- function(txt) {
   if (is.null(txt) || txt == "") return(numeric(0))
-  parts <- strsplit(txt, ",")[[1]] %>% trimws()
-  vals <- suppressWarnings(as.numeric(parts))
-  vals
+  
+  units <- strsplit(txt, ",")[[1]] %>% trimws()
+  
+  all_vals <- lapply(units, function(u) {
+    if (grepl(":", u)) {
+      #  colons
+      parts <- as.numeric(strsplit(u, ":")[[1]])
+      
+      if (length(parts) == 2) {
+        return(seq(from = parts[1], to = parts[2]))
+      } else if (length(parts) == 3) {
+        return(seq(from = parts[1], to = parts[3], by = parts[2]))
+      } else {
+        return(parts) 
+      }
+      
+      
+    } else if (grepl("\\*", u)) {
+      
+      parts <- strsplit(u, "\\*")[[1]] %>% trimws() %>% as.numeric()
+      if (length(parts) == 2) {
+        return(rep(parts[1], times = as.integer(parts[2])))
+      }
+    } else {
+      return(suppressWarnings(as.numeric(u)))
+    }
+  })
+  
+  vals <- unlist(all_vals)
+  return(vals[!is.na(vals)])
 }
 
 
@@ -299,7 +327,7 @@ ui <- page_navbar(
                   sidebar = sidebar(
                     width = 350,
                     title = "Model Parameters",
-                    helpText("Enter comma-separated values for parameter sets."),
+                    helpText("Enter comma-separated values for parameter sets, or, for a series of numbers, numbers in the format from:increment:to (e. g., 2:1:5 is understood as 2, 3, 4, 5)"),
                     
                     accordion(
                       accordion_panel(
@@ -938,6 +966,31 @@ server <- function(input, output) {
   ### cond_table ----
   cond_table <- reactive({
     
+    
+    # params <- params()
+    # 
+    # n_parameters <- lapply(params, function(x){length(unique(x))}) %>% unlist(use.names = TRUE)
+    # 
+    # recode_vec <- setNames(c(names(n_parameters),
+    #                          "earnings",
+    #                          "probabilities"), 
+    #                        c("Baseline RT",
+    #                          "Check RT",
+    #                          "P(Switch)",
+    #                          "Win",
+    #                          "Loss",
+    #                          "ITI",
+    #                          "Block duration",
+    #                          "Optimal Earnings",
+    #                          "Optimal Check Rate"
+    #                        ))
+    #                          
+    # 
+    # n_parameters_new <- n_parameters
+    # 
+    # 
+    # names(n_parameters_new) <- names(recode_vec[which(recode_vec == names(n_parameters))])
+    
     computation_results() %>%
       group_by(cond) %>%
       filter(earnings == reward_at_opt) %>%
@@ -946,7 +999,7 @@ server <- function(input, output) {
       relocate(color, baseline, checkrt, switchp, win, loss, iti, ttime, probabilities, earnings) %>%
       mutate(earnings = round(earnings, 2),
              probabilities = round(probabilities, 2)) %>%
-      rename("Win" = win,
+      rename("Win" = "win",
              "Loss" = loss,
              "Baseline RT" = baseline,
              "Check RT" = checkrt,
@@ -955,6 +1008,7 @@ server <- function(input, output) {
              "Block duration" = ttime,
              "Optimal Earnings" = earnings,
              "Optimal Check Rate" = probabilities) %>%
+      #rename(any_of(recode_vec)) %>%
       datatable(
         class = 'cell-border stripe compact',
         rownames = FALSE,
@@ -976,7 +1030,7 @@ server <- function(input, output) {
         ) 
       ) %>%
       formatStyle("color", target = "cell", backgroundColor = styleValue()) %>%
-      formatStyle("color", color = 'transparent')
+      formatStyle("color", color = 'transparent') 
   })
   
   ### cond_table1 ----
