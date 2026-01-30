@@ -1,9 +1,17 @@
+#To do:
+#fix the radio buttons
+#fix background color of scenario selector
+#tooltips for the sidetask
+#include equations
+
+
 library(bslib)
 library(shiny)
 library(tidyverse)
 library(plotly)
 library(DT)
 library(viridis)
+library(shinycssloaders) 
 
 source("compute_simulate.R")
 source("vectorized_simulation_v2.R")
@@ -15,6 +23,12 @@ parse_nums <- function(txt) {
   vals <- suppressWarnings(as.numeric(parts))
   vals
 }
+
+
+
+# ui ----
+
+
 
 # Define UI for application that draws a histogram
 ui <- page_navbar(
@@ -63,8 +77,12 @@ ui <- page_navbar(
     primary = "#2c3e50"
   ),
   
+  ## css ----
+  
   tags$head(
     tags$style(HTML("
+      
+
       /* =========================================================
          1. FIXED HEADERS SETUP
          ========================================================= */
@@ -178,7 +196,11 @@ ui <- page_navbar(
       
       strong, b { 
         font-weight: 900 !important; 
+        
+        
       }
+      
+      
     ")),
     
     # This script measures the headers and pushes the content down dynamically
@@ -203,7 +225,7 @@ ui <- page_navbar(
   ),
   
   
-  
+  ## Welcome page ----
   nav_panel("Welcome",
             icon = icon("house"),
             markdown("
@@ -260,137 +282,308 @@ ui <- page_navbar(
             
   ),
   
+  ## Computation/Simulation Tool ----
   nav_panel(
     title = "Computation/Simulation Tool",
     icon = icon("microchip"),
     
-    # Sidebar with a slider input for number of bins
-    layout_sidebar(
-      sidebar = sidebar(
-        width = 350,
-        title = "Model Parameters",
-        helpText("Enter comma-separated values for parameter sets."),
-        
-        accordion(
-          accordion_panel(
-            title = "Timing & Probabilities",
-            icon = icon("clock"),
-            span(
-              "Baseline RT ",
-              tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
-                      "The expected response time when the participant does not perform a check.")
-            ),
-            textInput("baseline", NULL, value = "1"),
-            
-            span(
-              "Check RT (comma separated, positive)",
-              tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
-                      "The expected response time when the participant does perform a check.")
-            ),
-            textInput("checkrt", NULL, value = "1.5"),
-            
-            span(
-              "P(Switch) (comma separated, positive)",
-              tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
-                      "The trial-by-trial probabilty that the task switches.")
-            ),
-            textInput("switchp", NULL, value = "0.05"),
-            
-            span(
-              "ITI (comma separated, positive)",
-              tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
-                      "The time interval in between trials. Modulates the rate of task completion.")
-            ),
-            textInput("iti", NULL, value = "0.1")
-          ),
-          accordion_panel(
-            "Rewards & Environment",
-            icon = icon("dollar-sign"),
-            span(
-              "Win Value",
-              tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
-                      "The win amount per correctly completed trial.")
-            ),
-            textInput("win", NULL, value = "1"),
-            
-            span(
-              "Loss Value",
-              tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
-                      "The loss amount per incorrect trial.")
-            ),
-            textInput("loss", NULL, value = "-1"),
-            
-            span(
-              "Block Duration",
-              tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
-                      "The total duration per block.")
-            ),
-            textInput("ttime", NULL, value = "120")
-          )
-        ),
-        
-        hr(),
-        
-        radioButtons("absolute_or_relative", label = "Absolute or relative rewards?", choices = c("relative", "absolute")),
-        
-        layout_columns(
-          actionButton("recalc", "Compute", icon = icon("calculator"), class = "btn-primary"),
-          actionButton("sim", "Simulate", icon = icon("play"), class = "btn-success"),
-          col_widths = c(6, 6)
-        )
+    ### Scenario 1 ----
+    
+    navset_pill(
+      nav_panel("Task-Switching Scenario",
+                # Sidebar with a slider input for number of bins
+                
+                #### sidebar ----
+                
+                layout_sidebar(
+                  sidebar = sidebar(
+                    width = 350,
+                    title = "Model Parameters",
+                    helpText("Enter comma-separated values for parameter sets."),
+                    
+                    accordion(
+                      accordion_panel(
+                        title = "Timing & Probabilities",
+                        icon = icon("clock"),
+                        span(
+                          "Baseline RT ",
+                          tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
+                                  "The expected response time when the participant does not perform a check.")
+                        ),
+                        textInput("baseline", NULL, value = "1"),
+                        
+                        span(
+                          "Check RT (comma separated, positive)",
+                          tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
+                                  "The expected response time when the participant does perform a check.")
+                        ),
+                        textInput("checkrt", NULL, value = "1.5"),
+                        
+                        span(
+                          "P(Switch) (comma separated, positive)",
+                          tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
+                                  "The trial-by-trial probabilty that the task switches.")
+                        ),
+                        textInput("switchp", NULL, value = "0.05"),
+                        
+                        span(
+                          "ITI (comma separated, positive)",
+                          tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
+                                  "The time interval in between trials. Modulates the rate of task completion.")
+                        ),
+                        textInput("iti", NULL, value = "0.1")
+                      ),
+                      accordion_panel(
+                        "Rewards & Environment",
+                        icon = icon("dollar-sign"),
+                        span(
+                          "Win Value",
+                          tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
+                                  "The win amount per correctly completed trial.")
+                        ),
+                        textInput("win", NULL, value = "1"),
+                        
+                        span(
+                          "Loss Value",
+                          tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
+                                  "The loss amount per incorrect trial.")
+                        ),
+                        textInput("loss", NULL, value = "-1"),
+                        
+                        span(
+                          "Block Duration",
+                          tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
+                                  "The total duration per block.")
+                        ),
+                        textInput("ttime", NULL, value = "120")
+                      )
+                    ),
+                    
+                    hr(),
+                    
+                    radioButtons("absolute_or_relative", label = "Absolute or relative rewards?", choices = c("relative", "absolute")),
+                    
+                    layout_columns(
+                      actionButton("recalc", "Compute", icon = icon("calculator"), class = "btn-primary"),
+                      actionButton("sim", "Simulate", icon = icon("play"), class = "btn-success"),
+                      col_widths = c(6, 6)
+                    )
+                  ),
+                  
+                  
+                  navset_card_underline(
+                    title = "Results Analysis",
+                    full_screen = TRUE,
+                    
+                    #### performance curves ----
+                    
+                    nav_panel(
+                      "Performance Curves",
+                      layout_columns(
+                        card(
+                          card_header("Theoretical (Computed)"),
+                          withSpinner(plotlyOutput("comp_plot"), type = 8)
+                        ),
+                        card(
+                          card_header("Stochastic (Simulated)"),
+                          withSpinner(plotlyOutput("sim_plot"), type = 8)
+                        ),
+                        col_widths = c(6, 6)
+                      ),
+                      
+                      card(
+                        card_header("Model Results"),
+                        div(class = "compact-table-container", 
+                            DT::dataTableOutput("cond_table1")
+                        )
+                      ),
+                      
+                    ),
+                    
+                    
+                    #### Model correlation ----
+                    nav_panel(
+                      "Model Correlation",
+                      card(
+                        card_header("Simulated vs. Computed Rewards"),
+                        plotlyOutput("cor_plot", height = "500px")
+                      ),
+                      card(
+                        card_header("Model Results"),
+                        div(class = "compact-table-container", 
+                            DT::dataTableOutput("cond_table2")
+                        )
+                      ),
+                    ),
+                    
+                    nav_panel(
+                      "Help",
+                    ),
+                  )
+                )
+                
       ),
       
-      
-      navset_card_underline(
-        title = "Results Analysis",
-        full_screen = TRUE,
-        
-        nav_panel(
-          "Performance Curves",
-          layout_columns(
-            card(
-              card_header("Theoretical (Computed)"),
-              plotlyOutput("comp_plot")
-            ),
-            card(
-              card_header("Stochastic (Simulated)"),
-              plotlyOutput("sim_plot")
-            ),
-            col_widths = c(6, 6)
-          ),
-          
-          card(
-            card_header("Model Results"),
-            div(class = "compact-table-container", 
-                DT::dataTableOutput("cond_table1")
-            )
-          ),
-          
-          card(
-            card_header("What am I looking at?"),
-            "Placeholder"
-          ),
-          
-        ),
-        
-        nav_panel(
-          "Model Correlation",
-          card(
-            card_header("Simulated vs. Computed Accuracy"),
-            plotlyOutput("cor_plot", height = "500px")
-          ),
-          card(
-            card_header("Model Results"),
-            div(class = "compact-table-container", 
-                DT::dataTableOutput("cond_table2")
-            )
-          ),
-        ),
-        
-        
+      ### Sidetask ----
+      nav_panel("Task + State checking",
+                
+                #### sidebar ----
+                
+                layout_sidebar(
+                  sidebar = sidebar(
+                    width = 350,
+                    title = "Model Parameters",
+                    helpText("Enter comma-separated values for parameter sets."),
+                    
+                    accordion(
+                      accordion_panel(
+                        title = "Timing & Probabilities",
+                        icon = icon("clock"),
+                        span(
+                          "Baseline RT ",
+                          tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
+                                  "The expected response time when the participant does not perform a check.")
+                        ),
+                        textInput("baseline_sidetask", NULL, value = "0.6"),
+                        
+                        span(
+                          "Check RT (comma separated, positive)",
+                          tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
+                                  "The expected response time when the participant does perform a check.")
+                        ),
+                        textInput("checkrt_sidetask", NULL, value = "1.7"),
+                        
+                        span(
+                          "P(go on) (comma separated, positive)",
+                          tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
+                                  "The trial-by-trial probabilty that the task switches.")
+                        ),
+                        textInput("p_go_on_sidetask", NULL, value = "0.1"),
+                        
+                        span(
+                          "P(go off) (comma separated, positive)",
+                          tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
+                                  "The trial-by-trial probabilty that the task switches.")
+                        ),
+                        textInput("p_go_off_sidetask", NULL, value = "0.1"),
+                        
+                        span(
+                          "ITI (comma separated, positive)",
+                          tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
+                                  "The time interval in between trials. Modulates the rate of task completion.")
+                        ),
+                        textInput("iti_sidetask", NULL, value = "0.2")
+                      ),
+                      accordion_panel(
+                        "Rewards & Environment",
+                        icon = icon("dollar-sign"),
+                        span(
+                          "Win for Task A",
+                          tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
+                                  "The win amount per correctly completed trial.")
+                        ),
+                        textInput("win_a_sidetask", NULL, value = "1"),
+                        
+                        span(
+                          "Loss for Task B",
+                          tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
+                                  "The loss amount per correctly completed trial.")
+                        ),
+                        textInput("loss_b_sidetask", NULL, value = "0"),
+                        
+                        
+                        span(
+                          "Win for Task B",
+                          tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
+                                  "The loss amount per incorrect trial.")
+                        ),
+                        textInput("win_b_sidetask", NULL, value = "0"),
+                        
+                        
+                        span(
+                          "Loss for Task B",
+                          tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
+                                  "The loss amount per incorrect trial.")
+                        ),
+                        textInput("loss_b_sidetask", NULL, value = "-10"),
+                        
+                        span(
+                          "Block Duration",
+                          tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
+                                  "The total duration per block.")
+                        ),
+                        textInput("ttime_sidetask", NULL, value = "120")
+                      )
+                    ),
+                    
+                    hr(),
+                    
+                    radioButtons("absolute_or_relative_sidetask", label = "Absolute or relative rewards?", choices = c("relative", "absolute")),
+                    
+                    layout_columns(
+                      actionButton("recalc_sidetask", "Compute", icon = icon("calculator"), class = "btn-primary"),
+                      actionButton("sim_sidetask", "Simulate", icon = icon("play"), class = "btn-success"),
+                      col_widths = c(6, 6)
+                    )
+                  ),
+                  
+                  
+                  navset_card_underline(
+                    title = "Results Analysis",
+                    full_screen = TRUE,
+                    
+                    #### performance curves ----
+                    
+                    nav_panel(
+                      "Performance Curves",
+                      layout_columns(
+                        card(
+                          card_header("Theoretical (Computed)"),
+                          withSpinner(plotlyOutput("comp_plot_sidetask"), type = 8)
+                        ),
+                        card(
+                          card_header("Stochastic (Simulated)"),
+                          withSpinner(plotlyOutput("sim_plot_sidetask"), type = 8)
+                        ),
+                        col_widths = c(6, 6)
+                      ),
+                      
+                      card(
+                        card_header("Model Results"),
+                        div(class = "compact-table-container", 
+                            DT::dataTableOutput("cond_table1_sidetask")
+                        )
+                      ),
+                      
+                    ),
+                    
+                    #### Model correlation ----
+                    
+                    nav_panel(
+                      "Model Correlation",
+                      card(
+                        card_header("Simulated vs. Computed Rewards"),
+                        plotlyOutput("cor_plot_sidetask", height = "500px")
+                      ),
+                      card(
+                        card_header("Model Results"),
+                        div(class = "compact-table-container", 
+                            DT::dataTableOutput("cond_table2_sidetask")
+                        )
+                      ),
+                    ),
+                    
+                    nav_panel(
+                      "Help",
+                    )
+                  )
+                )
+                
       )
     )
   ),
+  
+  ## Empirical Findings ----
   
   nav_panel("Empirical Findings",
             icon = icon("chart-line"),
@@ -401,6 +594,7 @@ ui <- page_navbar(
             )
   ),
   
+  ## people page ----
   
   nav_panel("People",
             icon = icon("user-group"),
@@ -506,8 +700,12 @@ task environments.
 )
 
 
+# server ----
+
 server <- function(input, output) {
   
+  ## standardtask ----
+  ### params ----
   params <- reactive({
     list(
       baseline = parse_nums(input$baseline),
@@ -520,7 +718,7 @@ server <- function(input, output) {
     )
   })
   
-  
+  ### computation_results ----
   computation_results <- eventReactive(input$recalc, {
     
     params <- params()
@@ -562,6 +760,8 @@ server <- function(input, output) {
     
   })
   
+  ### comp_plot ----
+  
   output$comp_plot <- renderPlotly({
     
     computation_results <- computation_results()
@@ -596,13 +796,14 @@ server <- function(input, output) {
     
     plt <- plt +
       scale_color_identity()+
+      coord_cartesian(xlim = c(0, 1), ylim = c(0, 1))+
       theme_classic()+
       theme(legend.position = "none")
     
     ggplotly(plt, tooltip = "text")
   })
   
-  
+  ### simulation_results ----
   simulation_results <- eventReactive(input$sim, {
     
     params <- params()
@@ -648,7 +849,7 @@ server <- function(input, output) {
   })
   
   
-  
+  ### render sim_plot ----
   output$sim_plot <- renderPlotly({
     
     simulation_results <- simulation_results()
@@ -683,13 +884,14 @@ server <- function(input, output) {
     
     plt <- plt +
       scale_color_identity()+
+      coord_cartesian(xlim = c(0, 1), ylim = c(0, 1))+
       theme_classic()+
       theme(legend.position = "none")
     
     ggplotly(plt, tooltip = "text")
   })
   
-  
+  ### render cor plot ----
   output$cor_plot <- renderPlotly({
     
     s <- simulation_results()
@@ -733,6 +935,7 @@ server <- function(input, output) {
     
   })
   
+  ### cond_table ----
   cond_table <- reactive({
     
     computation_results() %>%
@@ -776,16 +979,314 @@ server <- function(input, output) {
       formatStyle("color", color = 'transparent')
   })
   
+  ### cond_table1 ----
   output$cond_table1 <- renderDataTable({
     cond_table()
   })
   
+  ### cond_table2 ----
   # Output for the second location (e.g., a sub-pane or footer)
   output$cond_table2 <- renderDataTable({
     cond_table()
   })
   
+  
+  
+  
+  
+  # Sidetask ----------------------------------------------------------------
+  
+  ### params_sidetask ----
+  params_sidetask <- reactive({
+    list(
+      baseline = parse_nums(input$baseline_sidetask),
+      checkrt  = parse_nums(input$checkrt_sidetask),
+      p_go_on  = parse_nums(input$p_go_on_sidetask),
+      p_go_off = parse_nums(input$p_go_off_sidetask),
+      win_a    = parse_nums(input$win_a_sidetask),
+      win_b    = parse_nums(input$win_b_sidetask),
+      loss_b   = parse_nums(input$loss_b_sidetask),
+      iti      = parse_nums(input$iti_sidetask),
+      ttime    = parse_nums(input$ttime_sidetask)
+    )
+  })
+  
+  ### computation_results_sidetask ----
+  computation_results_sidetask <- eventReactive(input$recalc_sidetask, {
+    
+    params_sidetask <- params_sidetask()
+    
+    max_parameters <- lapply(params_sidetask, length) %>% unlist() %>% max()
+    
+    data.frame(baseline = rep(params_sidetask$baseline, length.out = max_parameters),
+               checkrt  = rep(params_sidetask$checkrt, length.out = max_parameters),
+               p_go_on  = rep(params_sidetask$p_go_on, length.out = max_parameters),
+               p_go_off = rep(params_sidetask$p_go_off, length.out = max_parameters),
+               win_a    = rep(params_sidetask$win_a, length.out = max_parameters),
+               win_b    = rep(params_sidetask$win_b, length.out = max_parameters),
+               loss_b   = rep(params_sidetask$loss_b, length.out = max_parameters),
+               iti      = rep(params_sidetask$iti, length.out = max_parameters),
+               ttime    = rep(params_sidetask$ttime, length.out = max_parameters)
+    ) %>%
+      mutate(cond = 1:n()) %>%
+      mutate(color = viridis::magma(n(), begin = 0.2, end = 0.8)) %>%
+      rowwise() %>%
+      mutate(
+        predictions = list(
+          comp_sidetask(RT_A_only = baseline,
+                        RT_A_B_check = checkrt,
+                        RT_A_B_response = checkrt,
+                        ITI = iti, 
+                        Win_A = win_a,
+                        Win_B = win_b,
+                        Loss_B = loss_b,
+                        p_go_on = p_go_on,
+                        p_go_off = p_go_off,
+                        Time = ttime,
+                        cr = seq(0, 1, by = 0.01))
+        )
+      ) %>%
+      ungroup() %>%
+      unnest(predictions) %>%
+      group_by(cond) %>%
+      mutate(is_max = ifelse(rel_reward == 1, 1, 0)) %>%
+      ungroup()
+    
+  })
+  
+  ### comp_plot_sidetask ----
+  output$comp_plot_sidetask <- renderPlotly({
+    
+    computation_results_sidetask <- computation_results_sidetask()
+    
+    plt <- ggplot(computation_results_sidetask)
+    
+    if (input$absolute_or_relative_sidetask == "relative"){
+      
+      plt <- plt +
+        geom_line(aes(x = cr, y = rel_reward, group = cond, color = color, 
+                      text = paste0(
+                        "Check Rate: ", round(cr, 2), "\n",
+                        "Reward: ", round(rel_reward, 2)
+                      )))+
+        geom_point(data = computation_results_sidetask %>% filter(is_max == 1), aes(x = cr, y = rel_reward, group = cond, color = color), size = 3, shape = 23)+
+        labs(x = "Check Rate",
+             y = "Relative reward")
+      
+    } else {
+      
+      plt <- plt +
+        geom_line(aes(x = cr, y = final_reward, group = cond, color = color,
+                      text = paste0(
+                        "Check Rate: ", round(cr, 2), "\n",
+                        "Reward: ", round(final_reward, 2)
+                      )))+
+        geom_point(data = computation_results_sidetask %>% filter(is_max == 1), aes(x = cr, y = final_reward, group = cond, color = color), size = 3, shape = 23)+
+        labs(x = "Check Rate",
+             y = "Absolute reward")
+      
+    }
+    
+    plt <- plt +
+      scale_color_identity()+
+      coord_cartesian(xlim = c(0, 1), ylim = c(0, 1))+
+      theme_classic()+
+      theme(legend.position = "none")
+    
+    ggplotly(plt, tooltip = "text")
+  })
+  
+  ### simulation_results_sidetask ----
+  simulation_results_sidetask <- eventReactive(input$sim_sidetask, {
+    
+    params_sidetask <- params_sidetask()
+    
+    max_parameters <- lapply(params_sidetask, length) %>% unlist() %>% max()
+    
+    data.frame(baseline = rep(params_sidetask$baseline, length.out = max_parameters),
+               checkrt  = rep(params_sidetask$checkrt, length.out = max_parameters),
+               p_go_on  = rep(params_sidetask$p_go_on, length.out = max_parameters),
+               p_go_off = rep(params_sidetask$p_go_off, length.out = max_parameters),
+               win_a    = rep(params_sidetask$win_a, length.out = max_parameters),
+               win_b    = rep(params_sidetask$win_b, length.out = max_parameters),
+               loss_b   = rep(params_sidetask$loss_b, length.out = max_parameters),
+               iti      = rep(params_sidetask$iti, length.out = max_parameters),
+               ttime    = rep(params_sidetask$ttime, length.out = max_parameters)
+    ) %>%
+      mutate(cond = 1:n()) %>%
+      mutate(color = viridis::magma(n(), begin = 0.2, end = 0.8)) %>%
+      rowwise() %>%
+      mutate(
+        predictions = list(
+          sim_sidetask_vec(RT_A_only = baseline,
+                           RT_A_B_check = checkrt,
+                           RT_A_B_response = checkrt,
+                           ITI = iti, 
+                           Win_A = win_a,
+                           Win_B = win_b,
+                           Loss_B = loss_b,
+                           p_go_on = p_go_on,
+                           p_go_off = p_go_off,
+                           Time = ttime,
+                           cr = seq(0, 1, by = 0.01),
+                           reps = 100)
+        )
+      ) %>%
+      ungroup() %>%
+      unnest(predictions) %>%
+      group_by(cond) %>%
+      mutate(is_max = ifelse(rel_reward == 1, 1, 0)) %>%
+      ungroup()
+    
+  })
+  
+  
+  ### sim_plot_sidetask ----
+  output$sim_plot_sidetask <- renderPlotly({
+    
+    simulation_results_sidetask <- simulation_results_sidetask()
+    
+    plt <- ggplot(simulation_results_sidetask)
+    
+    if (input$absolute_or_relative_sidetask == "relative"){
+      
+      plt <- plt +
+        geom_line(aes(x = cr, y = rel_reward, group = cond, color = color, 
+                      text = paste0(
+                        "Check Rate: ", round(cr, 2), "\n",
+                        "Reward: ", round(rel_reward, 2)
+                      )))+
+        geom_point(data = simulation_results_sidetask %>% filter(is_max == 1), aes(x = cr, y = rel_reward, group = cond, color = color), size = 3, shape = 23)+
+        labs(x = "Check Rate",
+             y = "Relative reward")
+      
+    } else {
+      
+      plt <- plt +
+        geom_line(aes(x = cr, y = final_reward, group = cond, color = color,
+                      text = paste0(
+                        "Check Rate: ", round(cr, 2), "\n",
+                        "Reward: ", round(final_reward, 2)
+                      )))+
+        geom_point(data = simulation_results_sidetask %>% filter(is_max == 1), aes(x = cr, y = final_reward, group = cond, color = color), size = 3, shape = 23)+
+        labs(x = "Check Rate",
+             y = "Absolute reward")
+      
+    }
+    
+    plt <- plt +
+      scale_color_identity()+
+      coord_cartesian(xlim = c(0, 1), ylim = c(0, 1))+
+      theme_classic()+
+      theme(legend.position = "none")
+    
+    ggplotly(plt, tooltip = "text")
+  })
+  
+  ### cor_plot_sidetask ----
+  output$cor_plot_sidetask <- renderPlotly({
+    
+    s <- simulation_results_sidetask()
+    c <- computation_results_sidetask()
+    
+    s <- s %>%
+      select(cond, color, cr, final_reward, rel_reward) %>%
+      rename(probabilities = cr,
+             sim_abs_reward = final_reward,
+             sim_rel_reward = rel_reward) %>%
+      mutate(probabilities = round(probabilities, 2))
+    
+    c <- c %>%
+      select(cond, color, cr, final_reward, rel_reward) %>%
+      rename(probabilities = cr,
+             com_abs_reward = final_reward,
+             com_rel_reward = rel_reward) %>%
+      mutate(probabilities = round(probabilities, 2))
+    
+    s_c <- left_join(s, c)
+    
+    if (input$absolute_or_relative == "relative"){
+      plt <- ggplot(s_c, aes(com_rel_reward, sim_rel_reward, color = color))+
+        labs(x = "computed: relative reward",
+             y = "simulated: relative reward")
+    } else {
+      plt <- ggplot(s_c, aes(com_abs_reward, sim_abs_reward, color = color))+
+        labs(x = "computed: absolute reward",
+             y = "simulated: absolute reward")
+      
+    }
+    
+    plt <- plt +
+      scale_color_identity()+
+      geom_point()+
+      geom_smooth(method = "lm", se = FALSE)+
+      geom_abline(slope = 1, intercept = 0)+
+      theme_classic()+
+      theme(legend.position = "none")
+    
+    ggplotly(plt)
+    
+  })
+  
+  ### cond_table_sidetask ----
+  cond_table_sidetask <- reactive({
+    
+    
+    computation_results_sidetask() %>%
+      group_by(cond) %>%
+      filter(rel_reward == 1) %>%
+      ungroup() %>%
+      select(-rel_reward, -cond, -is_max, -max_reward) %>%
+      relocate(color, cr, final_reward, baseline, checkrt, p_go_on, p_go_off, win_a, win_b, loss_b, iti, ttime) %>%
+      mutate(final_reward = round(final_reward, 2),
+             cr = round(cr, 2)) %>%
+      rename("Win A" = win_a,
+             "Win B" = win_b,
+             "Loss B" = loss_b,
+             "Baseline RT" = baseline,
+             "Check RT" = checkrt,
+             "P(go on)" = p_go_on,
+             "P(go off)" = p_go_off,
+             "ITI" = iti,
+             "Block duration" = ttime,
+             "Optimal Earnings" = final_reward,
+             "Optimal Check Rate" = cr) %>%
+      datatable(
+        class = 'cell-border stripe compact',
+        rownames = FALSE,
+        options = list(
+          ordering = FALSE,
+          searching = FALSE, 
+          lengthChange = FALSE, 
+          dom = 't',           # 't' means ONLY the table (hides search/pagination info)
+          scrollY = "200px",   # Fixes height and adds a scroll bar
+          scrollX = TRUE,      # Allows horizontal scrolling for small screens
+          pageLength = -1,      # Shows all rows since we are using a scroll bar
+          columnDefs = list(
+            list(
+              targets = 0,      # Targets the first column ('color')
+              width = '5px',   # Forces it to be narrow
+              title = ""        # Removes the header name
+            )
+          )
+        ) 
+      ) %>%
+      formatStyle("color", target = "cell", backgroundColor = styleValue()) %>%
+      formatStyle("color", color = 'transparent')
+  })
+  
+  ### cond_table1_sidetask ----
+  output$cond_table1_sidetask <- renderDataTable({
+    cond_table_sidetask()
+  })
+  
+  ### cond_table2_sidetask ----
+  output$cond_table2_sidetask <- renderDataTable({
+    cond_table_sidetask()
+  })
+  
 }
+
 
 
 # Run the application
