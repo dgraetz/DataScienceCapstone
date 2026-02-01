@@ -13,9 +13,12 @@ library(plotly)
 library(DT)
 library(viridis)
 library(shinycssloaders) 
+library(lmerTest)
 
 source("compute_simulate.R")
 source("vectorized_simulation_v2.R")
+
+full_data <- readRDS("empirical_data/full_data.RDS")
 
 #this transforms from text to numeric
 parse_nums <- function(txt) {
@@ -286,6 +289,8 @@ ui <- page_navbar(
                      * In the __Empirical Findings__ tab, you can read about the experiments we have conducted and to which degree empirical checking rates collected from human subjects line up with the predicitons from this computational model.
                      * Read more about the team in the __People__ tab. 
                      
+                     
+                     You can read more about our work on our [lab website](https://blogs.uoregon.edu/cognitivedynamics/home/), and the pre-registrations for [experiment 1](https://osf.io/ayvp9), [experiment 2](https://osf.io/dar78), and [experiment 3](https://osf.io/tvjw7) on OSF. You can find posters that I presented on this work under my [ResearchGate](https://www.researchgate.net/profile/Dominik-Graetz) profile.
                      
                      "),
             
@@ -616,9 +621,33 @@ ui <- page_navbar(
   nav_panel("Empirical Findings",
             icon = icon("chart-line"),
             navset_pill(
+              
+              
+              ### E1 ----
               nav_panel("Experiment 1", "E1"),
+              
+              ### E2 ----
               nav_panel("Experiment 2", "E2"),
-              nav_panel("Experiment 3", "E3")
+              
+              ### E3 ----
+              nav_panel("Experiment 3", 
+                        layout_columns(
+                          col_widths = c(6, 5),
+                          # Column 1: Your text/intro
+                          card(
+                            card_header("Project Overview"),
+                            "blablabla"
+                          ),
+                          
+                          # Column 2: The Plots stacked vertically
+                          # Wrapping them in a div or a card keeps them together in the second column
+                          card(
+                            card_header("Visualizations"),
+                            plotlyOutput("e3_optimality_curves"),
+                            plotOutput("e3_correlation")
+                          )
+                        )
+              )
             )
   ),
   
@@ -631,7 +660,7 @@ ui <- page_navbar(
                     style = "text-transform: uppercase; font-weight: 150; letter-spacing: 2px; margin-bottom: 40px;"),
             
             
-            # --- Profile Row 1: Dominik ---
+            ### Profile Dominik ----
             layout_columns(
               col_widths = c(3, 9),
               # The Photo Container
@@ -681,7 +710,7 @@ His current work focuses on empirical research on top-down controlled, bottom-up
             
             
             
-            # --- Profile Row 2: Ulrich Mayr ---
+            ### Profile Ulrich ----
             layout_columns(
               col_widths = c(3, 9), # Smaller column for photo, larger for text
               # The Photo Container
@@ -1281,6 +1310,86 @@ server <- function(input, output) {
     ggplotly(plt)
     
   })
+  
+  
+  ### e3_optimality_curves ----
+  output$e3_optimality_curves <- renderPlotly({
+    
+    exp <- full_data$e1
+    
+    lines <- exp$lines
+    agg <- exp$agg
+    dens_fast <- exp$dens$fast
+    dens_slow <- exp$dens$slow
+    
+    
+    
+    plt <- ggplot(lines, aes(x = probabilities, y = rel_reward, group = interaction(ID, group), color = Rate, text = paste0(
+      "RT not checking ", round(RT_nCC, 2), "\n",
+      "RT checking ", round(RT_CC, 2), "\n",
+      "Cost ", round((RT_CC-RT_nCC)/RT_nCC, 2), "\n",
+      "Optimum: ", round(opt_check, 2)
+    )))+
+      geom_line(alpha = 0.1)+
+      
+
+      
+      geom_ribbon(data = dens_slow, 
+                  aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), 
+                  inherit.aes = FALSE) +
+      geom_ribbon(data = dens_fast, 
+                  aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), 
+                  inherit.aes = FALSE) +
+      
+      
+      geom_point(data =  agg %>% filter(Rate == 0), 
+                 aes(x = mean_opt, y = 0.1), inherit.aes = FALSE, 
+                 pch = 23, fill = "white", size = 2)+
+      geom_point(data =  agg %>% filter(Rate == 1), 
+                 aes(x = mean_opt, y = 0.2), inherit.aes = FALSE, 
+                 pch = 23, fill = "white", size = 2)+
+      scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8, name = "",
+                            labels = c("0" = "fast rate",
+                                       "1" = "slow rate"))+
+      scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.8, name = "",
+                           labels = c("0" = "fast rate",
+                                      "1" = "slow rate"))+
+      
+      geom_text(data = NULL, aes(x = 0.8, y = 0.12, color = "0"), label = "fast")+
+      geom_text(data = NULL, aes(x = 0.8, y = 0.22), label = "slow")+
+      coord_cartesian(xlim = c(0, 1), ylim = c(0, 1))+
+      labs(x = "Possible Check Rates",
+           y = "Optimality")+
+      theme_classic()+
+      theme(legend.position = "none")
+    
+    ggplotly(plt, tooltip = "text")%>% 
+      toWebGL()
+    
+    
+  })
+  
+  ### e3 correlation ----
+  
+  output$e3_correlation <- renderPlot({
+    
+    exp <- full_data$e1$reg
+    
+    
+    ggplot(exp, aes(x = check_at_opt, y = CC, group = ID, color = ID))+
+      geom_abline(intercept = 0, slope = 1, linetype = "dotted")+
+      geom_smooth(method = "lm", se = FALSE)+
+      scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8)+
+      coord_fixed(xlim = c(0, 1), ylim = c(0, 1))+
+      labs(x = "Optimal Checking Rate from Computational Model",
+           y = "Observed Checking Rate")+
+      theme_classic()+
+      theme(legend.position = "none")
+
+    
+  })
+  
+  
   
   ### cond_table_sidetask ----
   cond_table_sidetask <- reactive({

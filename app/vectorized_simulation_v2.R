@@ -22,6 +22,8 @@ library(tidyverse)
 #   geom_line()+
 #   theme_classic()
 
+# IE simulation ---
+
 run_IE_sim <- function(SwitchP, 
                        ITI, 
                        Blockdur, 
@@ -158,7 +160,7 @@ sim_sidetask_vec <- function(RT_A_only,
   # 
   # reps <- 100
   # 
-  ############
+
   
   RT_min <- min(c(RT_A_only, RT_A_B_check, RT_A_B_check)) #only to determine the trials to simulate
   min_trials <- ceiling(Time/RT_min)
