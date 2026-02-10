@@ -1,7 +1,4 @@
 #To do:
-#fix the radio buttons
-#fix background color of scenario selector
-#tooltips for the sidetask
 #include equations
 #would be nice to highlight columns with different input values
 
@@ -19,6 +16,17 @@ source("compute_simulate.R")
 source("vectorized_simulation_v2.R")
 
 full_data <- readRDS("empirical_data/full_data.RDS")
+
+shared_e1 <- crosstalk::SharedData$new(full_data$e1$lines, key = ~ID, group = "exp1")
+shared_e1_reg <- crosstalk::SharedData$new(full_data$e1$reg, key = ~ID, group = "exp1")
+
+shared_e2 <- crosstalk::SharedData$new(full_data$e2$lines, key = ~ID, group = "exp2")
+shared_e2_reg <- crosstalk::SharedData$new(full_data$e2$reg, key = ~ID, group = "exp2")
+
+shared_e3 <- crosstalk::SharedData$new(full_data$e3$lines, key = ~ID, group = "exp3")
+shared_e3_reg <- crosstalk::SharedData$new(full_data$e3$reg, key = ~ID, group = "exp3")
+
+
 
 #this transforms from text to numeric
 parse_nums <- function(txt) {
@@ -198,10 +206,15 @@ ui <- page_navbar(
         color: #ffffff !important;           
       }
          
-      .form-control, input, textarea { 
-        background-color: #ffffff !important; 
-        color: #000000 !important; 
+      /* Target inputs ONLY when Dark Mode is active */
+      [data-bs-theme='dark'] input, 
+      [data-bs-theme='dark'] textarea, 
+      [data-bs-theme='dark'] .form-select {
+        background-color: #000000 !important;  /* Keep background white */
+        color: #ffffff !important;             /* Force text black */
       }
+      
+      
       
       [data-bs-theme='dark'] label { 
         color: #ffffff !important; 
@@ -224,6 +237,7 @@ ui <- page_navbar(
         height: 18px !important;         /* Hard limit on row height */
         vertical-align: middle !important;
       }
+      
       
       strong, b { 
         font-weight: 900 !important; 
@@ -322,8 +336,39 @@ ui <- page_navbar(
     
     ### Scenario 1 ----
     
-    navset_pill(
+    navset_underline(
       nav_panel("Task-Switching Scenario",
+                icon = icon("signs-post"),
+                hr(),
+                div(
+                  class = "alert alert-light border-0 shadow-sm d-flex align-items-center",
+                  style = "margin-bottom: 20px;",
+                  icon("circle-info", class = "me-3", style = "font-size: 1.5rem;"),
+                  div(
+                    h5("Scenario Context", class = "alert-heading mb-1"),
+                    p("In this scenario, participants perform a task with an ambiguous task stimulus. The task rule that allows for correct (and rewarded) responses can change from trial to trial with a specified switch probability. To find out the correct task, task rule cues are present on the screen. In the most typical scenario, checking task rules reduce uncertainty abotu the current task, but also come at a time cost. Here, you can insert various parameters to identify the optimal strategy.", class = "mb-0 text-muted small")
+                  ),
+                  # The Close Button
+                  tags$button(
+                    type = "button", 
+                    class = "btn-close ms-auto", 
+                    `data-bs-dismiss` = "alert", 
+                    `aria-label` = "Close"
+                  )
+                ),
+                
+                conditionalPanel(
+                  condition = "input.recalc == 0",
+                  div(
+                    class = "alert alert-info",
+                    style = "margin-top: 20px; border-left: 5px solid #2c3e50;",
+                    h4("How to use this tool:"),
+                    p("1. Tweak the 'Model Parameters' in the sidebar."),
+                    p("2. Click the 'Compute' and/or 'Simulate' button below the parameters."),
+                    p("3. The resulting graph will show you the optimal checking rate (the peak of the curve).")
+                  )
+                ),
+                
                 # Sidebar with a slider input for number of bins
                 
                 #### sidebar ----
@@ -332,7 +377,7 @@ ui <- page_navbar(
                   sidebar = sidebar(
                     width = 350,
                     title = "Model Parameters",
-                    helpText("Enter comma-separated values for parameter sets, or, for a series of numbers, numbers in the format from:increment:to (e. g., 2:1:5 is understood as 2, 3, 4, 5)"),
+                    helpText("Enter comma-separated values for parameter sets, or, for a series of numbers, numbers in the format from:increment:to (e. g., 2:0.2:3 is interpreted as 2, 2.02, 2.04, 2.06, 2.08, 2.1)"),
                     
                     accordion(
                       accordion_panel(
@@ -341,26 +386,26 @@ ui <- page_navbar(
                         span(
                           "Baseline RT ",
                           tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
-                                  "The expected response time when the participant does not perform a check.")
+                                  "The expected response time when the participant does not perform a task cue check.")
                         ),
                         textInput("baseline", NULL, value = "1"),
                         
                         span(
-                          "Check RT (comma separated, positive)",
+                          "Check RT",
                           tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
-                                  "The expected response time when the participant does perform a check.")
+                                  "The expected response time when the participant does perform a task cue check.")
                         ),
                         textInput("checkrt", NULL, value = "1.5"),
                         
                         span(
-                          "P(Switch) (comma separated, positive)",
+                          "P(Switch)",
                           tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
                                   "The trial-by-trial probabilty that the task switches.")
                         ),
                         textInput("switchp", NULL, value = "0.05"),
                         
                         span(
-                          "ITI (comma separated, positive)",
+                          "Inter-Trial-Interval",
                           tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
                                   "The time interval in between trials. Modulates the rate of task completion.")
                         ),
@@ -372,7 +417,7 @@ ui <- page_navbar(
                         span(
                           "Win Value",
                           tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
-                                  "The win amount per correctly completed trial.")
+                                  "The win amount per correct trial.")
                         ),
                         textInput("win", NULL, value = "1"),
                         
@@ -412,8 +457,11 @@ ui <- page_navbar(
                     
                     nav_panel(
                       "Performance Curves",
+                      
                       layout_columns(
+                        
                         card(
+                          
                           card_header("Theoretical (Computed)"),
                           withSpinner(plotlyOutput("comp_plot"), type = 8)
                         ),
@@ -449,8 +497,50 @@ ui <- page_navbar(
                       ),
                     ),
                     
+                    #### help ----
                     nav_panel(
                       "Help",
+                      
+                      withMathJax(
+                        tags$div(
+                          
+                          # 1. Probability of task staying the same
+                          p("First, we calculate the probability that the task remains the same at trial \\(n\\):"),
+                          p("$$p_{same}(n) = \\frac{1}{2} [1 + (1 - 2p)^n]$$"),
+                          
+                          # 2. Payoff on Non-Check (PONC)
+                          p("The expected payoff for a single trial \\(n\\) without checking:"),
+                          p("$$PONC_n = p_{same}(n) g + (1 - p_{same}(n)) l$$"),
+                          p("Where \\(g\\) is gain and \\(l\\) is loss."),
+                          br(),
+                          
+                          # 3. Average Payoff on Non-Check (APONC)
+                          p("The average payoff over a run of length \\(r\\) without checking:"),
+                          p("$$APONC_r = \\frac{1}{r} \\sum_{n=1}^{r} PONC_n$$"),
+                          
+                          # 4. Average Payoff on Check (APOC)
+                          p("If a check occurs on the last trial (guaranteeing a win), the average payoff is:"),
+                          p("$$APOC_r = \\frac{1}{r} (\\sum_{n=1}^{r-1} PONC_n + g)$$"),
+                          
+                          # 5. Cost Coefficient (CC)
+                          p("We calculate a time-cost multiplier based on RT, ITI, and check duration:"),
+                          p("$$CC_r = \\frac{RT + ITI + \\frac{CT+D}{r}}{RT + ITI}$$"),
+                          
+                          # 6. Adjusted Payoff (APOCTA)
+                          p("The average payoff of checking is adjusted by this time cost:"),
+                          p("$$APOCTA_r = \\frac{APOC_r}{CC_r}$$"),
+                          
+                          # 7. Net Value (PNCC)
+                          p("Finally, we compare the relative payoff of NOT checking vs. checking:"),
+                          p("$$PNCC_r = APONC_r - APOCTA_r$$"),
+                          
+                          # 8. Decision Rule
+                          
+                          p("Decision Policy:"),
+                          p("If \\(PNCC_r < 0\\), the optimal strategy is to check (Cue Fixation).")
+                          
+                        )
+                      )
                     ),
                   )
                 )
@@ -458,15 +548,47 @@ ui <- page_navbar(
       ),
       
       ### Sidetask ----
-      nav_panel("Task + State checking",
+      nav_panel(title = "Task + State checking",
+                icon = icon("satellite-dish"),
+                
+                hr(),
+                div(
+                  class = "alert alert-light border-0 shadow-sm d-flex align-items-center",
+                  style = "margin-bottom: 20px;",
+                  icon("circle-info", class = "me-3", style = "font-size: 1.5rem;"),
+                  div(
+                    h5("Scenario Context", class = "alert-heading mb-1"),
+                    p("In this scenario, participants perform a simple task. Additionally, a state can be on or off. When an 'on-state' is not checked and missed entirely, this leads to a Loss (as specified in the parameters). You can manipulate the probability that the state turns on and off (increasing both will lead to relatively short states). Because checking on a state comes at a time cost, the payout depends on the frequency of checking. You can explore here the optimality of different startegies.", class = "mb-0 text-muted small")
+                  ),
+                  # The Close Button
+                  tags$button(
+                    type = "button", 
+                    class = "btn-close ms-auto", 
+                    `data-bs-dismiss` = "alert", 
+                    `aria-label` = "Close"
+                  )
+                ),
+                
+                conditionalPanel(
+                  condition = "input.recalc == 0",
+                  div(
+                    class = "alert alert-info",
+                    style = "margin-top: 20px; border-left: 5px solid #2c3e50;",
+                    h4("How to use this tool:"),
+                    p("1. Tweak the 'Model Parameters' in the sidebar."),
+                    p("2. Click the 'Compute' and/or 'Simulate' button below the parameters."),
+                    p("3. The resulting graph will show you the optimal checking rate (the peak of the curve).")
+                  )
+                ),
                 
                 #### sidebar ----
+                
                 
                 layout_sidebar(
                   sidebar = sidebar(
                     width = 350,
                     title = "Model Parameters",
-                    helpText("Enter comma-separated values for parameter sets."),
+                    helpText("Enter comma-separated values for parameter sets, or, for a series of numbers, numbers in the format from:increment:to (e. g., 2:0.2:3 is interpreted as 2, 2.02, 2.04, 2.06, 2.08, 2.1)."),
                     
                     accordion(
                       accordion_panel(
@@ -480,28 +602,28 @@ ui <- page_navbar(
                         textInput("baseline_sidetask", NULL, value = "0.6"),
                         
                         span(
-                          "Check RT (comma separated, positive)",
+                          "Check RT",
                           tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
                                   "The expected response time when the participant does perform a check.")
                         ),
                         textInput("checkrt_sidetask", NULL, value = "1.7"),
                         
                         span(
-                          "P(go on) (comma separated, positive)",
+                          "P(go on)",
                           tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
-                                  "The trial-by-trial probabilty that the task switches.")
+                                  "The trial-by-trial probabilty that a state turns on.")
                         ),
                         textInput("p_go_on_sidetask", NULL, value = "0.1"),
                         
                         span(
-                          "P(go off) (comma separated, positive)",
+                          "P(go off)",
                           tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
-                                  "The trial-by-trial probabilty that the task switches.")
+                                  "The trial-by-trial probabilty that a state turns off.")
                         ),
                         textInput("p_go_off_sidetask", NULL, value = "0.1"),
                         
                         span(
-                          "ITI (comma separated, positive)",
+                          "ITI",
                           tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
                                   "The time interval in between trials. Modulates the rate of task completion.")
                         ),
@@ -517,18 +639,11 @@ ui <- page_navbar(
                         ),
                         textInput("win_a_sidetask", NULL, value = "1"),
                         
-                        span(
-                          "Loss for Task B",
-                          tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
-                                  "The loss amount per correctly completed trial.")
-                        ),
-                        textInput("loss_b_sidetask", NULL, value = "0"),
-                        
                         
                         span(
                           "Win for Task B",
                           tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
-                                  "The loss amount per incorrect trial.")
+                                  "The win amount for detecting a state.")
                         ),
                         textInput("win_b_sidetask", NULL, value = "0"),
                         
@@ -536,7 +651,7 @@ ui <- page_navbar(
                         span(
                           "Loss for Task B",
                           tooltip(icon("info-circle", style = "cursor: pointer; font-size: 0.8rem;"), 
-                                  "The loss amount per incorrect trial.")
+                                  "The loss amount for each missed state.")
                         ),
                         textInput("loss_b_sidetask", NULL, value = "-10"),
                         
@@ -624,16 +739,9 @@ ui <- page_navbar(
               
               
               ### E1 ----
-              nav_panel("Experiment 1", "E1"),
-              
-              ### E2 ----
-              nav_panel("Experiment 2", "E2"),
-              
-              ### E3 ----
-              nav_panel("Experiment 3", 
+              nav_panel("Experiment 1", 
                         layout_columns(
                           col_widths = c(6, 5),
-                          # Column 1: Your text/intro
                           card(
                             card_header("Project Overview"),
                             "blablabla"
@@ -643,9 +751,43 @@ ui <- page_navbar(
                           # Wrapping them in a div or a card keeps them together in the second column
                           card(
                             card_header("Visualizations"),
-                            plotlyOutput("e3_optimality_curves"),
-                            #plotlyOutput("e3_correlation")
-                            plotlyOutput("e3_correlation")
+                            withSpinner(plotlyOutput("e1_optimality_curves"), type = 8),
+                            withSpinner(plotlyOutput("e1_correlation"), type = 8)
+                          )
+                        )),
+              
+              ### E2 ----
+              nav_panel("Experiment 2", 
+                        layout_columns(
+                          col_widths = c(6, 5),
+                          card(
+                            card_header("Project Overview"),
+                            "blablabla"
+                          ),
+                          
+                          # Column 2: The Plots stacked vertically
+                          # Wrapping them in a div or a card keeps them together in the second column
+                          card(
+                            card_header("Visualizations"),
+                            withSpinner(plotlyOutput("e2_optimality_curves"), type = 8),
+                            
+                            withSpinner(plotlyOutput("e2_correlation"), type = 8)
+                          )
+                        )),
+              
+              ### E3 ----
+              nav_panel("Experiment 3", 
+                        layout_columns(
+                          col_widths = c(6, 5),
+                          card(
+                            card_header("Project Overview"),
+                            "blablabla"
+                          ),
+                          
+                          card(
+                            card_header("Visualizations"),
+                            withSpinner(plotlyOutput("e3_optimality_curves"), type = 8),
+                            withSpinner(plotlyOutput("e3_correlation"), type = 8)
                           )
                         )
               )
@@ -1021,46 +1163,74 @@ server <- function(input, output) {
     # 
     # names(n_parameters_new) <- names(recode_vec[which(recode_vec == names(n_parameters))])
     
-    computation_results() %>%
+    df_display <- computation_results() %>%
       group_by(cond) %>%
       filter(earnings == reward_at_opt) %>%
       ungroup() %>%
       select(-reward_at_opt, -rel_reward, -cond, -is_max) %>%
-      relocate(color, baseline, checkrt, switchp, win, loss, iti, ttime, probabilities, earnings) %>%
       mutate(earnings = round(earnings, 2),
-             probabilities = round(probabilities, 2)) %>%
+             probabilities = round(probabilities, 2),
+             rel_cost = ((checkrt - baseline)/baseline) %>% round(2)) %>%
+      relocate(color, probabilities, earnings, baseline, checkrt, rel_cost, switchp, win, loss, iti, ttime) %>%
       rename("Win" = "win",
              "Loss" = loss,
              "Baseline RT" = baseline,
              "Check RT" = checkrt,
+             "Relative Time Cost" = rel_cost,
              "P(Switch)" = switchp,
              "ITI" = iti,
              "Block duration" = ttime,
              "Optimal Earnings" = earnings,
-             "Optimal Check Rate" = probabilities) %>%
-      #rename(any_of(recode_vec)) %>%
-      datatable(
-        class = 'cell-border stripe compact',
-        rownames = FALSE,
-        options = list(
-          ordering = FALSE,
-          searching = FALSE, 
-          lengthChange = FALSE, 
-          dom = 't',           # 't' means ONLY the table (hides search/pagination info)
-          scrollY = "200px",   # Fixes height and adds a scroll bar
-          scrollX = TRUE,      # Allows horizontal scrolling for small screens
-          pageLength = -1,      # Shows all rows since we are using a scroll bar
-          columnDefs = list(
-            list(
-              targets = 0,      # Targets the first column ('color')
-              width = '5px',   # Forces it to be narrow
-              title = ""        # Removes the header name
-            )
+             "Optimal Check Rate" = probabilities) 
+    
+    
+    input_cols <- c("Baseline RT", "Check RT", "Relative Time Cost", 
+                    "P(Switch)", "Win", "Loss", "ITI", "Block duration")
+    
+    #I want to highlight the columns with multiple user inputs 
+    
+    # Find which of these columns have more than 1 unique value
+    idx_mul_val_cols <- lapply(input_cols, function(x){
+      df_display[,x] %>% unique %>% nrow()
+    }) %>% unlist()
+    
+    mul_val_col <- input_cols[idx_mul_val_cols > 1]
+    
+    
+    table <- datatable(
+      df_display,
+      class = 'cell-border stripe compact',
+      rownames = FALSE,
+      options = list(
+        ordering = FALSE,
+        searching = FALSE, 
+        lengthChange = FALSE, 
+        dom = 't',           # 't' means ONLY the table (hides search/pagination info)
+        scrollY = "200px",   # Fixes height and adds a scroll bar
+        scrollX = TRUE,      # Allows horizontal scrolling for small screens
+        pageLength = -1,      # Shows all rows since we are using a scroll bar
+        columnDefs = list(
+          list(
+            targets = 0,      # Targets the first column ('color')
+            width = '5px',   # Forces it to be narrow
+            title = ""        # Removes the header name
           )
-        ) 
-      ) %>%
+        )
+      ) 
+    ) %>%
       formatStyle("color", target = "cell", backgroundColor = styleValue()) %>%
       formatStyle("color", color = 'transparent') 
+    
+    if (length(mul_val_col) > 0) {
+      table <- table %>%
+        formatStyle(
+          columns = mul_val_col,
+          backgroundColor = 'rgba(255, 193, 7, 0.35)'
+        )
+    }
+    
+    table
+    
   })
   
   ### cond_table1 ----
@@ -1319,25 +1489,42 @@ server <- function(input, output) {
   cond_table_sidetask <- reactive({
     
     
-    computation_results_sidetask() %>%
+    df_display <- computation_results_sidetask() %>%
       group_by(cond) %>%
       filter(rel_reward == 1) %>%
       ungroup() %>%
       select(-rel_reward, -cond, -is_max, -max_reward) %>%
-      relocate(color, cr, final_reward, baseline, checkrt, p_go_on, p_go_off, win_a, win_b, loss_b, iti, ttime) %>%
       mutate(final_reward = round(final_reward, 2),
-             cr = round(cr, 2)) %>%
+             cr = round(cr, 2),
+             check_cost = (
+               (checkrt - baseline)/baseline) %>% round(2)) %>%
+      relocate(color, cr, final_reward, baseline, checkrt, check_cost, p_go_on, p_go_off, win_a, win_b, loss_b, iti, ttime) %>%
       rename("Win A" = win_a,
              "Win B" = win_b,
              "Loss B" = loss_b,
              "Baseline RT" = baseline,
              "Check RT" = checkrt,
+             "Relative Time Cost" = check_cost,
              "P(go on)" = p_go_on,
              "P(go off)" = p_go_off,
              "ITI" = iti,
              "Block duration" = ttime,
              "Optimal Earnings" = final_reward,
-             "Optimal Check Rate" = cr) %>%
+             "Optimal Check Rate" = cr) 
+    
+    input_cols <- c("Baseline RT", "Check RT", "Relative Time Cost", 
+                    "P(go on)", "P(go off)", "Win A", "Win B", "Loss B", "ITI", "Block duration")
+    
+    #I want to highlight the columns with multiple user inputs 
+    
+    # Find which of these columns have more than 1 unique value
+    idx_mul_val_cols <- lapply(input_cols, function(x){
+      df_display[,x] %>% unique %>% nrow()
+    }) %>% unlist()
+    
+    mul_val_col <- input_cols[idx_mul_val_cols > 1]
+    
+    table <- df_display %>%
       datatable(
         class = 'cell-border stripe compact',
         rownames = FALSE,
@@ -1360,6 +1547,18 @@ server <- function(input, output) {
       ) %>%
       formatStyle("color", target = "cell", backgroundColor = styleValue()) %>%
       formatStyle("color", color = 'transparent')
+    
+    if (length(mul_val_col) > 0) {
+      table <- table %>%
+        formatStyle(
+          columns = mul_val_col,
+          backgroundColor = 'rgba(255, 193, 7, 0.35)'
+        )
+    }
+    
+    table
+    
+    
   })
   
   ### cond_table1_sidetask ----
@@ -1373,105 +1572,246 @@ server <- function(input, output) {
   })
   
   
-  ## empirical findings ----
   
-  # # Create the unique key in your lines data
-  # full_data$e1$lines <- full_data$e1$lines %>%
-  #   mutate(shared_key = paste(ID, group, sep = "_"))
-  # 
-  # # Do the same for your regression/correlation data
-  # full_data$e1$reg <- full_data$e1$reg %>%
-  #   mutate(shared_key = paste(ID, group, sep = "_"))
-  # 
-  # # Use the new interaction key
-  # shared_e1 <- crosstalk::SharedData$new(full_data$e1$lines, 
-  #                                        key = ~shared_key, 
-  #                                        group = "exp3")
-  # 
-  # shared_e1_reg <- crosstalk::SharedData$new(full_data$e1$reg, 
-  #                                            key = ~shared_key, 
-  #                                            group = "exp3")
-  # 
-  # 
   
-  # ### e3_optimality_curves ----
-  output$e3_optimality_curves <- renderPlotly({
-
+  ### e1_optimality_curves ----
+  output$e1_optimality_curves <- renderPlotly({
+    
     exp <- full_data$e1
-
-    lines <- exp$lines
     agg <- exp$agg
     dens_fast <- exp$dens$fast
     dens_slow <- exp$dens$slow
-
-
-
-    plt <- ggplot(lines, aes(x = probabilities, y = rel_reward, group = interaction(ID, group), color = Rate, text = paste0(
-      "RT not checking ", round(RT_nCC, 2), "\n",
-      "RT checking ", round(RT_CC, 2), "\n",
-      "Cost ", round((RT_CC-RT_nCC)/RT_nCC, 2), "\n",
-      "Optimum: ", round(opt_check, 2)
-    )))+
-      geom_line(alpha = 0.1)+
-
-
-
-      geom_ribbon(data = dens_slow,
-                  aes(x = x, ymin = ymin, ymax = ymax, fill = Rate),
-                  inherit.aes = FALSE) +
-      geom_ribbon(data = dens_fast,
-                  aes(x = x, ymin = ymin, ymax = ymax, fill = Rate),
-                  inherit.aes = FALSE) +
-
-
-      geom_point(data =  agg %>% filter(Rate == 0),
-                 aes(x = mean_opt, y = 0.1), inherit.aes = FALSE,
-                 pch = 23, fill = "white", size = 2)+
-      geom_point(data =  agg %>% filter(Rate == 1),
-                 aes(x = mean_opt, y = 0.2), inherit.aes = FALSE,
-                 pch = 23, fill = "white", size = 2)+
-      scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8, name = "",
-                            labels = c("0" = "fast rate",
-                                       "1" = "slow rate"))+
-      scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.8, name = "",
-                           labels = c("0" = "fast rate",
-                                      "1" = "slow rate"))+
-
-      geom_text(data = NULL, aes(x = 0.8, y = 0.12, color = "0"), label = "fast")+
-      geom_text(data = NULL, aes(x = 0.8, y = 0.22), label = "slow")+
-      coord_cartesian(xlim = c(0, 1), ylim = c(0, 1))+
-      labs(x = "Possible Check Rates",
-           y = "Optimality")+
-      theme_classic()+
-      theme(legend.position = "none")
-
-    ggplotly(plt, tooltip = "text")%>%
-      toWebGL()
-
-
+    
+    plt <- ggplot(shared_e1, aes(x = probabilities, y = rel_reward, group = interaction(ID, group), color = Rate, 
+                                 text = paste0(
+                                   "ID: ", ID, "\n",
+                                   "RT not checking: ", round(RT_nCC, 2), "\n",
+                                   "RT checking: ", round(RT_CC, 2), "\n",
+                                   "Cost: ", round((RT_CC-RT_nCC)/RT_nCC, 2), "\n",
+                                   "Optimum: ", round(check_at_opt, 2)
+                                 )))+
+      geom_line(alpha = 0.5, lwd = 0.2) +
+      geom_ribbon(data = dens_slow, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
+      geom_ribbon(data = dens_fast, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
+      geom_point(data = agg %>% filter(Rate == 0), aes(x = mean_opt, y = 0.1), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
+      geom_point(data = agg %>% filter(Rate == 1), aes(x = mean_opt, y = 0.2), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
+      scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
+      scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
+      geom_text(data = NULL, aes(x = 0.8, y = max(dens_slow$ymax, na.rm = TRUE) + 0.01), label = "slow", color = "#FE9F6D") +
+      geom_text(data = NULL, aes(x = 0.8, y = max(dens_fast$ymax, na.rm = TRUE) + 0.01), label = "fast", color = "#3B0F70") +
+      coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
+      labs(x = "Possible Check Rates", y = "Optimality") +
+      theme_classic() +
+      theme(legend.position = "none",
+            plot.background = element_rect(fill = "transparent", color = NA),
+            panel.background = element_rect(fill = "transparent", color = NA))
+    
+    ggplotly(plt, tooltip = "text") %>% 
+      toWebGL() %>%
+      highlight(on = "plotly_hover", off = "plotly_doubleclick", color = "cyan", persistent = FALSE) %>%
+      layout(paper_bgcolor = 'rgba(0,0,0,0)', plot_bgcolor = 'rgba(0,0,0,0)')
   })
-
-  ### e3 correlation ----
-
+  
+  ### e1_correlation ----
+  output$e1_correlation <- renderPlotly({
+    
+    plt_corr <- ggplot(shared_e1_reg, aes(x = check_at_opt, y = CC_pred, group = ID, color = ID,
+                                          text = paste0(
+                                            "ID: ", ID, "\n",
+                                            "slope: ", round(slope, 2)
+                                          ))) +
+      geom_abline(intercept = 0, slope = 1, linetype = "dotted") +
+      geom_line() +
+      scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
+      coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
+      labs(x = "Model Optimal Rate", y = "Observed Rate") +
+      theme_classic() +
+      theme(legend.position = "none",
+            plot.background = element_rect(fill = "transparent", color = NA),
+            panel.background = element_rect(fill = "transparent", color = NA))
+    
+    
+    # plt_corr <- ggplot(shared_e3_reg, aes(x = check_at_opt, y = CC, group = ID, color = ID,
+    #                                       text = paste0(
+    #                                         "ID: ", ID, "\n",
+    #                                         "slope: ", round(slope, 2)
+    #                                       ))) +
+    #   geom_abline(intercept = 0, slope = 1, linetype = "dotted") +
+    #   geom_smooth(method = "lm", se = FALSE) + # Individual subject regression lines/slopes
+    #   scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
+    #   coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
+    #   labs(x = "Model Optimal Rate", y = "Observed Rate") +
+    #   theme_classic() +
+    #   theme(legend.position = "none",
+    #         plot.background = element_rect(fill = "transparent", color = NA),
+    #         panel.background = element_rect(fill = "transparent", color = NA))
+    
+    
+    ggplotly(plt_corr, tooltip = "text") %>%
+      toWebGL() %>%
+      highlight(on = "plotly_hover",  off = "plotly_deselect", color = "cyan", persistent = FALSE) %>%
+      layout(paper_bgcolor = 'rgba(0,0,0,0)', plot_bgcolor = 'rgba(0,0,0,0)')
+  })
+  
+  ### e2_optimality_curves ----
+  output$e2_optimality_curves <- renderPlotly({
+    
+    exp <- full_data$e2
+    agg <- exp$agg
+    dens_fast <- exp$dens$fast
+    dens_slow <- exp$dens$slow
+    
+    plt <- ggplot(shared_e2, aes(x = probabilities, y = rel_reward, group = interaction(ID, group), color = Rate, 
+                                 text = paste0(
+                                   "ID: ", ID, "\n",
+                                   "RT not checking: ", round(RT_nCC, 2), "\n",
+                                   "RT checking: ", round(RT_CC, 2), "\n",
+                                   "Cost: ", round((RT_CC-RT_nCC)/RT_nCC, 2), "\n",
+                                   "Optimum: ", round(check_at_opt, 2)
+                                 )))+
+      geom_line(alpha = 0.5, lwd = 0.2) +
+      geom_ribbon(data = dens_slow, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
+      geom_ribbon(data = dens_fast, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
+      geom_point(data = agg %>% filter(Rate == 0), aes(x = mean_opt, y = 0.1), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
+      geom_point(data = agg %>% filter(Rate == 1), aes(x = mean_opt, y = 0.2), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
+      scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
+      scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
+      geom_text(data = NULL, aes(x = 0.8, y = max(dens_slow$ymax, na.rm = TRUE) + 0.01), label = "slow", color = "#FE9F6D") +
+      geom_text(data = NULL, aes(x = 0.8, y = max(dens_fast$ymax, na.rm = TRUE) + 0.01), label = "fast", color = "#3B0F70") +
+      coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
+      labs(x = "Possible Check Rates", y = "Optimality") +
+      theme_classic() +
+      theme(legend.position = "none",
+            plot.background = element_rect(fill = "transparent", color = NA),
+            panel.background = element_rect(fill = "transparent", color = NA))
+    
+    ggplotly(plt, tooltip = "text") %>% 
+      toWebGL() %>%
+      highlight(on = "plotly_hover", off = "plotly_doubleclick", color = "cyan", persistent = FALSE) %>%
+      layout(paper_bgcolor = 'rgba(0,0,0,0)', plot_bgcolor = 'rgba(0,0,0,0)')
+  })
+  
+  ### e3_correlation ----
+  output$e2_correlation <- renderPlotly({
+    
+    plt_corr <- ggplot(shared_e2_reg, aes(x = check_at_opt, y = CC_pred, group = ID, color = ID,
+                                          text = paste0(
+                                            "ID: ", ID, "\n",
+                                            "slope: ", round(slope, 2)
+                                          ))) +
+      geom_abline(intercept = 0, slope = 1, linetype = "dotted") +
+      geom_line() +
+      scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
+      coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
+      labs(x = "Model Optimal Rate", y = "Observed Rate") +
+      theme_classic() +
+      theme(legend.position = "none",
+            plot.background = element_rect(fill = "transparent", color = NA),
+            panel.background = element_rect(fill = "transparent", color = NA))
+    
+    
+    # plt_corr <- ggplot(shared_e3_reg, aes(x = check_at_opt, y = CC, group = ID, color = ID,
+    #                                       text = paste0(
+    #                                         "ID: ", ID, "\n",
+    #                                         "slope: ", round(slope, 2)
+    #                                       ))) +
+    #   geom_abline(intercept = 0, slope = 1, linetype = "dotted") +
+    #   geom_smooth(method = "lm", se = FALSE) + # Individual subject regression lines/slopes
+    #   scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
+    #   coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
+    #   labs(x = "Model Optimal Rate", y = "Observed Rate") +
+    #   theme_classic() +
+    #   theme(legend.position = "none",
+    #         plot.background = element_rect(fill = "transparent", color = NA),
+    #         panel.background = element_rect(fill = "transparent", color = NA))
+    
+    
+    ggplotly(plt_corr, tooltip = "text") %>%
+      toWebGL() %>%
+      highlight(on = "plotly_hover",  off = "plotly_deselect", color = "cyan", persistent = FALSE) %>%
+      layout(paper_bgcolor = 'rgba(0,0,0,0)', plot_bgcolor = 'rgba(0,0,0,0)')
+  })
+  
+  ### e3_optimality_curves ----
+  output$e3_optimality_curves <- renderPlotly({
+    
+    exp <- full_data$e3
+    agg <- exp$agg
+    dens_fast <- exp$dens$fast
+    dens_slow <- exp$dens$slow
+    
+    plt <- ggplot(shared_e3, aes(x = probabilities, y = rel_reward, group = interaction(ID, group), color = Rate, 
+                                 text = paste0(
+                                   "ID: ", ID, "\n",
+                                   "RT not checking: ", round(RT_nCC, 2), "\n",
+                                   "RT checking: ", round(RT_CC, 2), "\n",
+                                   "Cost: ", round((RT_CC-RT_nCC)/RT_nCC, 2), "\n",
+                                   "Optimum: ", round(check_at_opt, 2)
+                                 )))+
+      geom_line(alpha = 0.5, lwd = 0.2) +
+      geom_ribbon(data = dens_slow, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
+      geom_ribbon(data = dens_fast, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
+      geom_point(data = agg %>% filter(Rate == 0), aes(x = mean_opt, y = 0.1), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
+      geom_point(data = agg %>% filter(Rate == 1), aes(x = mean_opt, y = 0.2), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
+      scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
+      scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
+      geom_text(data = NULL, aes(x = 0.8, y = max(dens_slow$ymax, na.rm = TRUE) + 0.01), label = "slow", color = "#FE9F6D") +
+      geom_text(data = NULL, aes(x = 0.8, y = max(dens_fast$ymax, na.rm = TRUE) + 0.01), label = "fast", color = "#3B0F70") +
+      coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
+      labs(x = "Possible Check Rates", y = "Optimality") +
+      theme_classic() +
+      theme(legend.position = "none",
+            plot.background = element_rect(fill = "transparent", color = NA),
+            panel.background = element_rect(fill = "transparent", color = NA))
+    
+    ggplotly(plt, tooltip = "text") %>% 
+      toWebGL() %>%
+      highlight(on = "plotly_hover", off = "plotly_doubleclick", color = "cyan", persistent = FALSE) %>%
+      layout(paper_bgcolor = 'rgba(0,0,0,0)', plot_bgcolor = 'rgba(0,0,0,0)')
+  })
+  
+  ### e3_correlation ----
   output$e3_correlation <- renderPlotly({
-
-    exp <- full_data$e1$reg
-
-
-    plt <- ggplot(exp, aes(x = check_at_opt, y = CC, group = ID, color = ID))+
-      geom_abline(intercept = 0, slope = 1, linetype = "dotted")+
-      geom_smooth(method = "lm", se = FALSE)+
-      scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8)+
-      coord_fixed(xlim = c(0, 1), ylim = c(0, 1))+
-      labs(x = "Optimal Checking Rate from Computational Model",
-           y = "Observed Checking Rate")+
-      theme_classic()+
-      theme(legend.position = "none")
-
-    ggplotly(plt, tooltip = "text")%>%
-      toWebGL()
-
+    
+    plt_corr <- ggplot(shared_e3_reg, aes(x = check_at_opt, y = CC_pred, group = ID, color = ID,
+                                          text = paste0(
+                                            "ID: ", ID, "\n",
+                                            "slope: ", round(slope, 2)
+                                          ))) +
+      geom_abline(intercept = 0, slope = 1, linetype = "dotted") +
+      geom_line() +
+      scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
+      coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
+      labs(x = "Model Optimal Rate", y = "Observed Rate") +
+      theme_classic() +
+      theme(legend.position = "none",
+            plot.background = element_rect(fill = "transparent", color = NA),
+            panel.background = element_rect(fill = "transparent", color = NA))
+    
+    
+    # plt_corr <- ggplot(shared_e3_reg, aes(x = check_at_opt, y = CC, group = ID, color = ID,
+    #                                       text = paste0(
+    #                                         "ID: ", ID, "\n",
+    #                                         "slope: ", round(slope, 2)
+    #                                       ))) +
+    #   geom_abline(intercept = 0, slope = 1, linetype = "dotted") +
+    #   geom_smooth(method = "lm", se = FALSE) + # Individual subject regression lines/slopes
+    #   scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
+    #   coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
+    #   labs(x = "Model Optimal Rate", y = "Observed Rate") +
+    #   theme_classic() +
+    #   theme(legend.position = "none",
+    #         plot.background = element_rect(fill = "transparent", color = NA),
+    #         panel.background = element_rect(fill = "transparent", color = NA))
+    
+    
+    ggplotly(plt_corr, tooltip = "text") %>%
+      toWebGL() %>%
+      highlight(on = "plotly_hover",  off = "plotly_deselect", color = "cyan", persistent = FALSE) %>%
+      layout(paper_bgcolor = 'rgba(0,0,0,0)', plot_bgcolor = 'rgba(0,0,0,0)')
   })
+  
+  
   
   
   
