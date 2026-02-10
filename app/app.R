@@ -644,7 +644,8 @@ ui <- page_navbar(
                           card(
                             card_header("Visualizations"),
                             plotlyOutput("e3_optimality_curves"),
-                            plotOutput("e3_correlation")
+                            #plotlyOutput("e3_correlation")
+                            plotlyOutput("e3_correlation")
                           )
                         )
               )
@@ -1077,7 +1078,7 @@ server <- function(input, output) {
   
   
   
-  # Sidetask ----------------------------------------------------------------
+  ## Sidetask ----------------------------------------------------------------
   
   ### params_sidetask ----
   params_sidetask <- reactive({
@@ -1312,83 +1313,6 @@ server <- function(input, output) {
   })
   
   
-  ### e3_optimality_curves ----
-  output$e3_optimality_curves <- renderPlotly({
-    
-    exp <- full_data$e1
-    
-    lines <- exp$lines
-    agg <- exp$agg
-    dens_fast <- exp$dens$fast
-    dens_slow <- exp$dens$slow
-    
-    
-    
-    plt <- ggplot(lines, aes(x = probabilities, y = rel_reward, group = interaction(ID, group), color = Rate, text = paste0(
-      "RT not checking ", round(RT_nCC, 2), "\n",
-      "RT checking ", round(RT_CC, 2), "\n",
-      "Cost ", round((RT_CC-RT_nCC)/RT_nCC, 2), "\n",
-      "Optimum: ", round(opt_check, 2)
-    )))+
-      geom_line(alpha = 0.1)+
-      
-
-      
-      geom_ribbon(data = dens_slow, 
-                  aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), 
-                  inherit.aes = FALSE) +
-      geom_ribbon(data = dens_fast, 
-                  aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), 
-                  inherit.aes = FALSE) +
-      
-      
-      geom_point(data =  agg %>% filter(Rate == 0), 
-                 aes(x = mean_opt, y = 0.1), inherit.aes = FALSE, 
-                 pch = 23, fill = "white", size = 2)+
-      geom_point(data =  agg %>% filter(Rate == 1), 
-                 aes(x = mean_opt, y = 0.2), inherit.aes = FALSE, 
-                 pch = 23, fill = "white", size = 2)+
-      scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8, name = "",
-                            labels = c("0" = "fast rate",
-                                       "1" = "slow rate"))+
-      scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.8, name = "",
-                           labels = c("0" = "fast rate",
-                                      "1" = "slow rate"))+
-      
-      geom_text(data = NULL, aes(x = 0.8, y = 0.12, color = "0"), label = "fast")+
-      geom_text(data = NULL, aes(x = 0.8, y = 0.22), label = "slow")+
-      coord_cartesian(xlim = c(0, 1), ylim = c(0, 1))+
-      labs(x = "Possible Check Rates",
-           y = "Optimality")+
-      theme_classic()+
-      theme(legend.position = "none")
-    
-    ggplotly(plt, tooltip = "text")%>% 
-      toWebGL()
-    
-    
-  })
-  
-  ### e3 correlation ----
-  
-  output$e3_correlation <- renderPlot({
-    
-    exp <- full_data$e1$reg
-    
-    
-    ggplot(exp, aes(x = check_at_opt, y = CC, group = ID, color = ID))+
-      geom_abline(intercept = 0, slope = 1, linetype = "dotted")+
-      geom_smooth(method = "lm", se = FALSE)+
-      scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8)+
-      coord_fixed(xlim = c(0, 1), ylim = c(0, 1))+
-      labs(x = "Optimal Checking Rate from Computational Model",
-           y = "Observed Checking Rate")+
-      theme_classic()+
-      theme(legend.position = "none")
-
-    
-  })
-  
   
   
   ### cond_table_sidetask ----
@@ -1447,6 +1371,109 @@ server <- function(input, output) {
   output$cond_table2_sidetask <- renderDataTable({
     cond_table_sidetask()
   })
+  
+  
+  ## empirical findings ----
+  
+  # # Create the unique key in your lines data
+  # full_data$e1$lines <- full_data$e1$lines %>%
+  #   mutate(shared_key = paste(ID, group, sep = "_"))
+  # 
+  # # Do the same for your regression/correlation data
+  # full_data$e1$reg <- full_data$e1$reg %>%
+  #   mutate(shared_key = paste(ID, group, sep = "_"))
+  # 
+  # # Use the new interaction key
+  # shared_e1 <- crosstalk::SharedData$new(full_data$e1$lines, 
+  #                                        key = ~shared_key, 
+  #                                        group = "exp3")
+  # 
+  # shared_e1_reg <- crosstalk::SharedData$new(full_data$e1$reg, 
+  #                                            key = ~shared_key, 
+  #                                            group = "exp3")
+  # 
+  # 
+  
+  # ### e3_optimality_curves ----
+  output$e3_optimality_curves <- renderPlotly({
+
+    exp <- full_data$e1
+
+    lines <- exp$lines
+    agg <- exp$agg
+    dens_fast <- exp$dens$fast
+    dens_slow <- exp$dens$slow
+
+
+
+    plt <- ggplot(lines, aes(x = probabilities, y = rel_reward, group = interaction(ID, group), color = Rate, text = paste0(
+      "RT not checking ", round(RT_nCC, 2), "\n",
+      "RT checking ", round(RT_CC, 2), "\n",
+      "Cost ", round((RT_CC-RT_nCC)/RT_nCC, 2), "\n",
+      "Optimum: ", round(opt_check, 2)
+    )))+
+      geom_line(alpha = 0.1)+
+
+
+
+      geom_ribbon(data = dens_slow,
+                  aes(x = x, ymin = ymin, ymax = ymax, fill = Rate),
+                  inherit.aes = FALSE) +
+      geom_ribbon(data = dens_fast,
+                  aes(x = x, ymin = ymin, ymax = ymax, fill = Rate),
+                  inherit.aes = FALSE) +
+
+
+      geom_point(data =  agg %>% filter(Rate == 0),
+                 aes(x = mean_opt, y = 0.1), inherit.aes = FALSE,
+                 pch = 23, fill = "white", size = 2)+
+      geom_point(data =  agg %>% filter(Rate == 1),
+                 aes(x = mean_opt, y = 0.2), inherit.aes = FALSE,
+                 pch = 23, fill = "white", size = 2)+
+      scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8, name = "",
+                            labels = c("0" = "fast rate",
+                                       "1" = "slow rate"))+
+      scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.8, name = "",
+                           labels = c("0" = "fast rate",
+                                      "1" = "slow rate"))+
+
+      geom_text(data = NULL, aes(x = 0.8, y = 0.12, color = "0"), label = "fast")+
+      geom_text(data = NULL, aes(x = 0.8, y = 0.22), label = "slow")+
+      coord_cartesian(xlim = c(0, 1), ylim = c(0, 1))+
+      labs(x = "Possible Check Rates",
+           y = "Optimality")+
+      theme_classic()+
+      theme(legend.position = "none")
+
+    ggplotly(plt, tooltip = "text")%>%
+      toWebGL()
+
+
+  })
+
+  ### e3 correlation ----
+
+  output$e3_correlation <- renderPlotly({
+
+    exp <- full_data$e1$reg
+
+
+    plt <- ggplot(exp, aes(x = check_at_opt, y = CC, group = ID, color = ID))+
+      geom_abline(intercept = 0, slope = 1, linetype = "dotted")+
+      geom_smooth(method = "lm", se = FALSE)+
+      scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8)+
+      coord_fixed(xlim = c(0, 1), ylim = c(0, 1))+
+      labs(x = "Optimal Checking Rate from Computational Model",
+           y = "Observed Checking Rate")+
+      theme_classic()+
+      theme(legend.position = "none")
+
+    ggplotly(plt, tooltip = "text")%>%
+      toWebGL()
+
+  })
+  
+  
   
 }
 

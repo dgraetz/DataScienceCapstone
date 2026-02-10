@@ -11,6 +11,14 @@ opt_e1 <- opt_e1 %>%
   rename(Rate = Dotdiff) %>%
   mutate(group = interaction(SwitchP, Delay, Placeh, Rate))
 
+opt_e1 <- opt_e1 %>%
+  group_by(ID) %>%
+  mutate(intercept = lm(CC ~ check_at_opt)$coefficients[1],
+         slope = lm(CC ~ check_at_opt)$coefficients[2],
+         CC_pred = intercept+check_at_opt*slope)
+
+  
+
 opt_e1_lines <- opt_e1 %>%
   unnest(temp) %>%
   group_by(ID, Rate, SwitchP, Delay, Placeh) %>%
@@ -54,6 +62,14 @@ opt_e2 <- opt_e2 %>%
   rename(Rate = squarediff) %>%
   mutate(group = interaction(SwitchP, Placeh, Rate))
 
+
+opt_e2 <- opt_e2 %>%
+  group_by(ID) %>%
+  mutate(intercept = lm(CC ~ check_at_opt)$coefficients[1],
+         slope = lm(CC ~ check_at_opt)$coefficients[2],
+         CC_pred = intercept+check_at_opt*slope)
+
+
 opt_e2_lines <- opt_e2 %>%
   unnest(temp) %>%
   group_by(ID, Rate, SwitchP, Placeh) %>%
@@ -95,6 +111,14 @@ full_data$e2 <- list(reg = opt_e2,
 opt_e3 <- opt_e3 %>%
   rename(Rate = ITICond) %>%
   mutate(group = interaction(Placeh, Rate))
+
+opt_e3 <- opt_e3 %>%
+  group_by(ID) %>%
+  mutate(intercept = lm(CC ~ check_at_opt)$coefficients[1],
+         slope = lm(CC ~ check_at_opt)$coefficients[2],
+         CC_pred = intercept+check_at_opt*slope)
+
+
 
 opt_e3_lines <- opt_e3 %>%
   unnest(temp) %>%
