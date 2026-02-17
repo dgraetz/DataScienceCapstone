@@ -108,7 +108,14 @@ ui <- page_navbar(
     )
   ),
   
-  title = "Attentional Decision Hub",
+  title = tags$div(
+    style = "display: flex; flex-direction: column; justify-content: center; padding-top: 5px;",
+    tags$span("Attentional Decision Hub", style = "line-height: 1.2;"),
+    tags$span(
+      "companion app for Graetz, Froeber, & Mayr (in prep)", 
+      style = "font-size: 0.65rem; font-style: italic; font-weight: normal; opacity: 0.8; line-height: 1;"
+    )
+  ),
   
   theme = bs_theme(
     version = 5,
@@ -273,40 +280,77 @@ ui <- page_navbar(
   ## Welcome page ----
   nav_panel("Welcome",
             icon = icon("house"),
+            
+            div(
+              # 1. Add 'd-flex' to enable flexible positioning
+              class = "alert alert-info d-flex", 
+              style = "margin-top: 20px; border-left: 5px solid #2c3e50;",
+              
+              # 2. Add 'align-self-center' to the icon so it floats in the middle
+              icon("circle-info", class = "me-3 align-self-center", style = "font-size: 1.5rem;"),
+              
+              div(
+                h5("What is this about?", class = "alert-heading mb-1"),
+                p("This website is a companion app for a journal article in preparation. We are researching how humans make decisions about where they place their attention, dependent on context variables (e. g., how quickly are demands changing and how rewarding are adaptations of behavior to the environment) and intraindividual variables (e. g., speed). This website features a discussion of the general framework and theoretical background here on the Welcome page. It also includes a Computation/Simulation tool for you to test the effect of different variables, and a presentation of our findings.", class = "mb-0 text-muted small")
+              ),
+              
+              # 3. Add 'align-self-start' to the button so it stays at the top
+              tags$button(
+                type = "button", 
+                class = "btn-close ms-auto align-self-start", 
+                `data-bs-dismiss` = "alert", 
+                `aria-label` = "Close"
+              )
+            ),
             markdown("
-                     # Welcome
-                     ### Decision-Making about our Attention
+
+# Welcome
+### Decision-Making about our Attention
                      
-                     We are interested in how our cognitive system controls where to focus attention. The answer to this question will depend on the context, but our approach to this question is through the lens of rational decision-making. 
+We are interested in how our cognitive system controls where to focus attention. The answer to this question depends on the specific context, but our general approach to this question is through the lens of rational decision-making. 
                      
-                     For this project, I am highlighting one context in which humans decide on an attentional checking policy - and our research has found that they consider the costs and benefits of possible strategies at least to some degree to make a decision.  
+For this project, **I am highlighting one context** in which humans decide on an attentional checking-for-information policy - and our research has found that they consider the costs and benefits of possible strategies to make an attentional decision.  
                      
-                     #### Decision Variables to consider
-                     When faced with an ambiguous task to which the response rules may change over time, how frequently should we check cues that reveal the task rule? For example, when completing a time-limited, open-book exam, how do we make decisions about when to check out notes? Let's consider the two extreme strategies: When you're checking your notes 0 % of the time, so never, you will be very fast (and can potentially respond to all questions), although at a cost of accuracy. On the other hand, checking notes for every question, so 100 % of the time, is very slow, so it comes at a cost of speed, resulting in fewer prompts answered.
-                     Let's look at the following context and individual variables ore systematically:
-                     * __Payoff for correct responses:__ If a question is worth a lot of points, it's more important to get it right, making checking _more_ adaptive.
-                     * __Uncertainty__: If you're unsure about the question (i. e., more liekly to make an error), it may be _more_ adaptive to go and check for the correct response.
-                     * __Time it takes to scramble for the answer:__ If you're running out of time and the information you need is in a moving box in the basement, it might take too long to check the answer, making checking more costly, and, _less_ adaptive.
-                     * __Your response speed__: If you need longer to respond to an individual question, then it's more important to get the few questions you can tackle right. When the time cost for checking remains constant, slower reaction times make it *more* adaptive to check.
-                     
-                     These considerations transfer to a wide range of scenarios, that all have in common that decisions must be made between attenting to a primary task and relevant information in the environment (e. g., navigating a new city and checking the GPS, giving a speech and checking notes, cooking and checking a recipe, making a purchase and comparing prices etc.).
-                     
-                     #### Computational Model and Simulations
-                     
-                     We have developed a __computational model__ and __Monte-Carlo simulation__ that allows us to calculate the payoff for different attentional strategies. From a rational decision-making perspective, humans should select an attentional strategy that aligns with the maxmimum payoff. However, as you can see under the Computation/Simulation Lab, many contexts yield an optimality curve that is fairly broad, i. e., a function where a realtively wide range of checking strategies come relatively close to the optimum. 
-                     
-                     ### This website
-                     
-                     The goal of this website is to showcase my work. 
-                     * Under the __Computation/Simulation Lab__ section, you can explore how manipulating the different parameters affect the attentional decision-making landscape. 
-    
-                     * In the __Empirical Findings__ tab, you can read about the experiments we have conducted and to which degree empirical checking rates collected from human subjects line up with the predicitons from this computational model.
-                     * Read more about the team in the __People__ tab. 
-                     
-                     
-                     You can read more about our work on our [lab website](https://blogs.uoregon.edu/cognitivedynamics/home/), and the pre-registrations for [experiment 1](https://osf.io/ayvp9), [experiment 2](https://osf.io/dar78), and [experiment 3](https://osf.io/tvjw7) on OSF. You can find posters that I presented on this work under my [ResearchGate](https://www.researchgate.net/profile/Dominik-Graetz) profile.
-                     
-                     "),
+> EXAMPLE SCENARIO: You're driving a car with the assistance of a GPS. If you use a GPS on a familiar route, it offers little information (~ the environment does not demand frequent updating of information, instead you can naviagte from memory alone). Attending to a GPS will also be rather risky if the encoding of the information takes rather long (~ time cost). This cost may be mitigated if you're moving rather slow and need to make few turns (~ long primary task duration). As another factor, if you're on your way to an important meeting, you might rely on the GPS more (~benefits of correct, costs of incorrect, performance).
+
+<br>
+
+#### Characteristics of the context of interest:
+To more generally characterize the context that we present research on: 
+1) The primary task must be ambiguous and might benefit at least to some degree from additional information
+2) Completing a primary task takes time, and obtaining additional information costs additional time
+3) Performing the primary task correctly leads to benefits, performing incorrectly leads to costs
+4) Time for completing the task is limited.
+
+<br>
+
+#### Decision Variables to consider:
+
+* __Payoff for correct responses vs. Losses for incorrect responses:__ High payoffs for correct responses and high losses for incorrect responses will bias optimal behavior to more checking.
+* __Uncertainty__: Higher switch rates, or in other words, greater uncertainty about the rule that leads to correct task performance, will bias optimal behavior to more checking.
+* __Information retrieval time:__ Lower time costs for obtaining additional information will bias optimal behavior to more checking.
+* __Your response speed__: Slower primary task response rates will bias optimal behavior to more checking. This may appear counter-intuitive, but the intuition is that if tasks take longer while the information retrieval time remains constant (lower _relative checking cost_), it is more adaptive to check.
+
+These considerations transfer to a wide range of scenarios, that all have in common that decisions must be made between attenting to a primary task and relevant information in the environment (e. g., using notes and books during an open book exam, giving a speech and checking notes, cooking and checking a recipe, making a purchase and comparing prices etc.).
+
+<br>
+
+#### Computational Model and Simulations
+
+We have developed a __computational model__ and __Monte-Carlo simulation__ that allows us to calculate the payoff for different attentional strategies. From a rational decision-making perspective, humans should select an attentional strategy that aligns with the maxmimum payoff. However, as you can see under the Computation/Simulation Lab, many contexts yield an optimality curve that is fairly broad, i. e., a function where a realtively wide range of checking strategies come relatively close to the optimum. 
+
+<br>
+
+### This website
+
+The goal of this website is to showcase my work. 
+* Under the __Computation/Simulation Lab__ section, you can explore how manipulating the different parameters affect the attentional decision-making landscape. 
+* In the __Empirical Findings__ tab, you can read about the experiments we have conducted and to which degree empirical checking rates collected from human subjects line up with the predicitons from this computational model.
+* Read more about the team in the __People__ tab. 
+
+You can read more about our work on our [lab website](https://blogs.uoregon.edu/cognitivedynamics/home/), and the pre-registrations for [experiment 1](https://osf.io/ayvp9), [experiment 2](https://osf.io/dar78), and [experiment 3](https://osf.io/tvjw7) on OSF. You can find posters that I presented on this work under my [ResearchGate](https://www.researchgate.net/profile/Dominik-Graetz) profile.
+"
+            ),
             
             layout_columns(
               col_widths = c(9, 3), # Smaller column for photo, larger for text
@@ -831,6 +875,13 @@ ui <- page_navbar(
                     style = "color: #00ccbb; text-decoration: none;" # ResearchGate Teal
                   ),
                   
+                  # ResearchGate Link
+                  tags$a(
+                    href = "https://github.com/dgraetz", 
+                    target = "_blank",
+                    icon("github"),
+                  ),
+                  
                   # Email Link (Optional but helpful)
                   tags$a(
                     href = "mailto:dgrtz@uoregon.edu", 
@@ -850,6 +901,8 @@ He developed the simulation framework powering this application.
 His current work focuses on empirical research on top-down controlled, bottom-up-driven, and context-dependent human attention.
     ")
             ),
+            
+            hr(),
             
             
             
