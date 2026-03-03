@@ -12,7 +12,6 @@ library(viridis)
 library(shinycssloaders) 
 library(lmerTest)
 
-source("compute_simulate.R")
 source("vectorized_simulation_v2.R")
 
 full_data <- readRDS("empirical_data/full_data.RDS")
@@ -543,7 +542,7 @@ You can read more about our work on our [lab website](https://blogs.uoregon.edu/
                     
                     #### help ----
                     nav_panel(
-                      "Help",
+                      "Help & Model Info",
                       
                       withMathJax(
                         tags$div(
@@ -765,8 +764,10 @@ You can read more about our work on our [lab website](https://blogs.uoregon.edu/
                       ),
                     ),
                     
+                    #### help ----
+                    
                     nav_panel(
-                      "Help",
+                      "Help & Model Info",
                     )
                   )
                 )
@@ -788,7 +789,43 @@ You can read more about our work on our [lab website](https://blogs.uoregon.edu/
                           col_widths = c(6, 5),
                           card(
                             card_header("Project Overview"),
-                            "blablabla"
+                            markdown("
+
+
+In Experiment 1, we manipulated four variables:
+* Task completion rate (perceptual difficulty was low vs. high)
+  - Rate was manipulated by making the primary task easier or more difficult to encode. The response-relevant information needed to be decoded from a random dot motion task. In the slow condition, dot coherence built up over the course of one second, significantly delaying the availability of taks-relevant information. The normative model predicts higher check rates when task response rates are slow because the absolute time check cost is relatively small when the primary task takes longer to predict.
+* Task rule switch probability (10 % vs. 25 %)
+* Cue onset delay (task cue shows up instantly or with 1 s delay)
+* Placeholders (cues were present on the screen, or absent)
+  - We manipulated bototm-up salience of cues, we implemented two conditions that determined whether cues were present on the screen by default, or absent. We expected that participants would check the task cues more frequently when they were present, supported by no or only a small difference in check rates. 
+
+Participants had 150 seconds to complete a block of trials. 
+
+<br>
+
+
+# Findings
+
+The normative model makes individual predictions for each person in each condition, given individual RT parameters. These predictions are displayed in the upper graph, here colored by the level of the rate manipulation. As can be seen, when RTs are relatively slow, the optima are shifted to the right. The violin plots indicate the distribution of optimal check rates.
+
+
+The lower figure plots the empirically measured check rates (y axis) against the optimal check rates predicted by the model. Nearly all subjects have positive slopes, though there is quite some variance in slope intercepts. 
+
+## Main Effects
+
+As perdicted, participants checked task cues more frequently when a) the task completion rate was slow, the task switch probability high, task cue delays short and placeholders present on the screen. 
+
+Interestingly when placeholders were present, this led to a small, but significant, relative cost benefit (due to the easier findability of task cues). However, the main effect of this manipulation on observed checking rates was drastically higher than on the optima. 
+
+
+# Participants
+
+We recruited 46 subjects (43 were included in the analysis) from the human subjects pool at the University of Oregon. Participants were compensated with course credit and paid according to rewards accrued in the study.
+
+                                     
+                                     "
+                            ),
                           ),
                           
                           # Column 2: The Plots stacked vertically
@@ -806,7 +843,41 @@ You can read more about our work on our [lab website](https://blogs.uoregon.edu/
                           col_widths = c(6, 5),
                           card(
                             card_header("Project Overview"),
-                            "blablabla"
+                            markdown("
+
+
+In Experiment 2, we manipulated three variables:
+* Task completion rate (response difficulty was low vs. high)
+  - Rate was manipulated by making the primary task easier or more difficult to respond to. While the critical stimulus display remained the same, the response had to be made by dragging a cursor from the center of the screen to one of four rectangles that corresponded to the choice, but that varied in size and distance. In the difficult (and slow) condition, these 'response squares' were small and relatively far from the center of the screen, whereas in the easy (and fast condition), they were close to the respective option and big in size.
+* Task rule switch probability (5 vs. 15 %)
+* Placeholders (cues were present on the screen, or absent)
+  - We again manipulated bottom-up salience of cues and implemented two conditions that determined whether cues were present on the screen by default, or absent. We expected that participants would check the task cues more frequently when they were present, supported by no or only a small difference in check rates. 
+
+Participants had 120 seconds to complete a block of trials. 
+
+<br>
+
+
+# Findings
+
+The first figure again shows the prediction for the levels of the response difficulty/rate manipulation.
+
+The lower figure plots the empirically measured check rates (y axis) against the optimal check rates predicted by the model. Nearly all subjects have positive slopes, though there is quite some variance in slope intercepts. 
+
+## Main Effects
+
+Again, as perdicted, participants checked task cues more frequently when a) the task completion rate was slow, the task switch probability high, and placeholders present on the screen. 
+
+Similar to experiment 1, when placeholders were present, this led to a small, but significant, relative cost benefit (due to the easier findability of task cues). However, the main effect of this manipulation on observed checking rates was drastically higher than on the optima. 
+
+
+# Participants
+
+We recruited 41 subjects from the human subjects pool at the University of Oregon. Participants were compensated with course credit and paid according to rewards accrued in the study.
+
+                                     
+                                     "
+                            ),
                           ),
                           
                           # Column 2: The Plots stacked vertically
@@ -825,7 +896,39 @@ You can read more about our work on our [lab website](https://blogs.uoregon.edu/
                           col_widths = c(6, 5),
                           card(
                             card_header("Project Overview"),
-                            "blablabla"
+                            markdown("
+
+
+In Experiment 3, we manipulated two variables:
+* Task completion rate (inter-trial-interval was short (0.1 s) vs. long (1.6 s))
+  - Rate was manipulated by varying the inter-trial interval duration. Longer ITIs affect lower the costs because per unit of time, fewer trials can be completed, reducing the opportunity cost experienced during cue checks.
+* Placeholders (cues were present on the screen, or absent)
+  - Given the consisten placeholder salience effect in Experiments 1 and 2 on both, the optimal check rate and the outcome, we decided to manipulate salience on three levels. Here, as a new level we introduced a sudden onset placeholder that flickered at the beginning of the trial. Given the results of prior experiments, we were interested in whether this additional level is associated ieht more checking and a reduced relative cost. Finding increased check rates and lower relative costs could have implications on how salience-related increases of 'capture' are interpreted.
+
+Participants had 120 seconds to complete a block of trials. 
+
+<br>
+
+
+# Findings
+
+The first figure again shows the prediction for the levels of the response difficulty/rate manipulation.
+
+The lower figure plots the empirically measured check rates (y axis) against the optimal check rates predicted by the model. Nearly all subjects have positive slopes, though there is quite some variance in slope intercepts. 
+
+## Main Effects
+
+Again, as perdicted, participants checked task cues more frequently when a) the task completion rate was slow, and as placeholder salience increased. 
+
+As placeholder salience increaed, we again replicated the effect of salience from absent to present task cues on both, reduced relative costs and increased checking rates. However, while sudden onsets resulted in more checking of task cues, it was not accompanied by a further reduction in relative checking costs. 
+
+# Participants
+
+We recruited 44 subjects (41 subjects were included in the final sample) from the human subjects pool at the University of Oregon. Participants were compensated with course credit and paid according to rewards accrued in the study.
+
+                                     
+                                     "
+                            ),
                           ),
                           
                           card(
@@ -1630,58 +1733,62 @@ server <- function(input, output) {
   ### e1_optimality_curves ----
   output$e1_optimality_curves <- renderPlotly({
     
-    exp <- full_data$e1
-    agg <- exp$agg
-    dens_fast <- exp$dens$fast
-    dens_slow <- exp$dens$slow
+    # exp <- full_data$e1
+    # agg <- exp$agg
+    # dens_fast <- exp$dens$fast
+    # dens_slow <- exp$dens$slow
+    # 
+    # plt <- ggplot(shared_e1, aes(x = probabilities, y = rel_reward, group = interaction(ID, group), color = Rate, 
+    #                              text = paste0(
+    #                                "ID: ", ID, "\n",
+    #                                "RT not checking: ", round(RT_nCC, 2), "\n",
+    #                                "RT checking: ", round(RT_CC, 2), "\n",
+    #                                "Cost: ", round((RT_CC-RT_nCC)/RT_nCC, 2), "\n",
+    #                                "Optimum: ", round(check_at_opt, 2)
+    #                              )))+
+    #   geom_line(alpha = 0.5, lwd = 0.2) +
+    #   geom_ribbon(data = dens_slow, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
+    #   geom_ribbon(data = dens_fast, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
+    #   geom_point(data = agg %>% filter(Rate == 0), aes(x = mean_opt, y = 0.1), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
+    #   geom_point(data = agg %>% filter(Rate == 1), aes(x = mean_opt, y = 0.2), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
+    #   scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
+    #   scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
+    #   geom_text(data = NULL, aes(x = 0.8, y = max(dens_slow$ymax, na.rm = TRUE) + 0.01), label = "slow", color = "#FE9F6D") +
+    #   geom_text(data = NULL, aes(x = 0.8, y = max(dens_fast$ymax, na.rm = TRUE) + 0.01), label = "fast", color = "#3B0F70") +
+    #   coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
+    #   labs(x = "Possible Check Rates", y = "Optimality") +
+    #   theme_classic() +
+    #   theme(legend.position = "none",
+    #         plot.background = element_rect(fill = "transparent", color = NA),
+    #         panel.background = element_rect(fill = "transparent", color = NA))
     
-    plt <- ggplot(shared_e1, aes(x = probabilities, y = rel_reward, group = interaction(ID, group), color = Rate, 
-                                 text = paste0(
-                                   "ID: ", ID, "\n",
-                                   "RT not checking: ", round(RT_nCC, 2), "\n",
-                                   "RT checking: ", round(RT_CC, 2), "\n",
-                                   "Cost: ", round((RT_CC-RT_nCC)/RT_nCC, 2), "\n",
-                                   "Optimum: ", round(check_at_opt, 2)
-                                 )))+
-      geom_line(alpha = 0.5, lwd = 0.2) +
-      geom_ribbon(data = dens_slow, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
-      geom_ribbon(data = dens_fast, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
-      geom_point(data = agg %>% filter(Rate == 0), aes(x = mean_opt, y = 0.1), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
-      geom_point(data = agg %>% filter(Rate == 1), aes(x = mean_opt, y = 0.2), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
-      scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
-      scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
-      geom_text(data = NULL, aes(x = 0.8, y = max(dens_slow$ymax, na.rm = TRUE) + 0.01), label = "slow", color = "#FE9F6D") +
-      geom_text(data = NULL, aes(x = 0.8, y = max(dens_fast$ymax, na.rm = TRUE) + 0.01), label = "fast", color = "#3B0F70") +
-      coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
-      labs(x = "Possible Check Rates", y = "Optimality") +
-      theme_classic() +
-      theme(legend.position = "none",
-            plot.background = element_rect(fill = "transparent", color = NA),
-            panel.background = element_rect(fill = "transparent", color = NA))
     
-    ggplotly(plt, tooltip = "text") %>% 
-      toWebGL() %>%
-      highlight(on = "plotly_hover", off = "plotly_doubleclick", color = "cyan", persistent = FALSE) %>%
-      layout(paper_bgcolor = 'rgba(0,0,0,0)', plot_bgcolor = 'rgba(0,0,0,0)')
+    # ggplotly(plt, tooltip = "text") %>% 
+    #   toWebGL() %>%
+    #   highlight(on = "plotly_hover", off = "plotly_doubleclick", color = "cyan", persistent = FALSE) %>%
+    #   layout(paper_bgcolor = 'rgba(0,0,0,0)', plot_bgcolor = 'rgba(0,0,0,0)')
+    
+    
+    ggplotly(full_data$e1$figs$curves, tooltip = "text") 
   })
   
   ### e1_correlation ----
   output$e1_correlation <- renderPlotly({
     
-    plt_corr <- ggplot(shared_e1_reg, aes(x = check_at_opt, y = CC_pred, group = ID, color = ID,
-                                          text = paste0(
-                                            "ID: ", ID, "\n",
-                                            "slope: ", round(slope, 2)
-                                          ))) +
-      geom_abline(intercept = 0, slope = 1, linetype = "dotted") +
-      geom_line() +
-      scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
-      coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
-      labs(x = "Model Optimal Rate", y = "Observed Rate") +
-      theme_classic() +
-      theme(legend.position = "none",
-            plot.background = element_rect(fill = "transparent", color = NA),
-            panel.background = element_rect(fill = "transparent", color = NA))
+    # plt_corr <- ggplot(shared_e1_reg, aes(x = check_at_opt, y = CC_pred, group = ID, color = ID,
+    #                                       text = paste0(
+    #                                         "ID: ", ID, "\n",
+    #                                         "slope: ", round(slope, 2)
+    #                                       ))) +
+    #   geom_abline(intercept = 0, slope = 1, linetype = "dotted") +
+    #   geom_line() +
+    #   scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
+    #   coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
+    #   labs(x = "Model Optimal Rate", y = "Observed Rate") +
+    #   theme_classic() +
+    #   theme(legend.position = "none",
+    #         plot.background = element_rect(fill = "transparent", color = NA),
+    #         panel.background = element_rect(fill = "transparent", color = NA))
     
     
     # plt_corr <- ggplot(shared_e3_reg, aes(x = check_at_opt, y = CC, group = ID, color = ID,
@@ -1698,70 +1805,75 @@ server <- function(input, output) {
     #   theme(legend.position = "none",
     #         plot.background = element_rect(fill = "transparent", color = NA),
     #         panel.background = element_rect(fill = "transparent", color = NA))
+    # 
+    # 
+    # ggplotly(plt_corr, tooltip = "text") %>%
+    #   toWebGL() %>%
+    #   highlight(on = "plotly_hover",  off = "plotly_deselect", color = "cyan", persistent = FALSE) %>%
+    #   layout(paper_bgcolor = 'rgba(0,0,0,0)', plot_bgcolor = 'rgba(0,0,0,0)')
     
     
-    ggplotly(plt_corr, tooltip = "text") %>%
-      toWebGL() %>%
-      highlight(on = "plotly_hover",  off = "plotly_deselect", color = "cyan", persistent = FALSE) %>%
-      layout(paper_bgcolor = 'rgba(0,0,0,0)', plot_bgcolor = 'rgba(0,0,0,0)')
+    ggplotly(full_data$e1$figs$lines, tooltip = "text") 
   })
   
   ### e2_optimality_curves ----
   output$e2_optimality_curves <- renderPlotly({
     
-    exp <- full_data$e2
-    agg <- exp$agg
-    dens_fast <- exp$dens$fast
-    dens_slow <- exp$dens$slow
+    # exp <- full_data$e2
+    # agg <- exp$agg
+    # dens_fast <- exp$dens$fast
+    # dens_slow <- exp$dens$slow
+    # 
+    # plt <- ggplot(shared_e2, aes(x = probabilities, y = rel_reward, group = interaction(ID, group), color = Rate, 
+    #                              text = paste0(
+    #                                "ID: ", ID, "\n",
+    #                                "RT not checking: ", round(RT_nCC, 2), "\n",
+    #                                "RT checking: ", round(RT_CC, 2), "\n",
+    #                                "Cost: ", round((RT_CC-RT_nCC)/RT_nCC, 2), "\n",
+    #                                "Optimum: ", round(check_at_opt, 2)
+    #                              )))+
+    #   geom_line(alpha = 0.5, lwd = 0.2) +
+    #   geom_ribbon(data = dens_slow, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
+    #   geom_ribbon(data = dens_fast, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
+    #   geom_point(data = agg %>% filter(Rate == 0), aes(x = mean_opt, y = 0.1), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
+    #   geom_point(data = agg %>% filter(Rate == 1), aes(x = mean_opt, y = 0.2), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
+    #   scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
+    #   scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
+    #   geom_text(data = NULL, aes(x = 0.8, y = max(dens_slow$ymax, na.rm = TRUE) + 0.01), label = "slow", color = "#FE9F6D") +
+    #   geom_text(data = NULL, aes(x = 0.8, y = max(dens_fast$ymax, na.rm = TRUE) + 0.01), label = "fast", color = "#3B0F70") +
+    #   coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
+    #   labs(x = "Possible Check Rates", y = "Optimality") +
+    #   theme_classic() +
+    #   theme(legend.position = "none",
+    #         plot.background = element_rect(fill = "transparent", color = NA),
+    #         panel.background = element_rect(fill = "transparent", color = NA))
     
-    plt <- ggplot(shared_e2, aes(x = probabilities, y = rel_reward, group = interaction(ID, group), color = Rate, 
-                                 text = paste0(
-                                   "ID: ", ID, "\n",
-                                   "RT not checking: ", round(RT_nCC, 2), "\n",
-                                   "RT checking: ", round(RT_CC, 2), "\n",
-                                   "Cost: ", round((RT_CC-RT_nCC)/RT_nCC, 2), "\n",
-                                   "Optimum: ", round(check_at_opt, 2)
-                                 )))+
-      geom_line(alpha = 0.5, lwd = 0.2) +
-      geom_ribbon(data = dens_slow, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
-      geom_ribbon(data = dens_fast, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
-      geom_point(data = agg %>% filter(Rate == 0), aes(x = mean_opt, y = 0.1), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
-      geom_point(data = agg %>% filter(Rate == 1), aes(x = mean_opt, y = 0.2), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
-      scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
-      scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
-      geom_text(data = NULL, aes(x = 0.8, y = max(dens_slow$ymax, na.rm = TRUE) + 0.01), label = "slow", color = "#FE9F6D") +
-      geom_text(data = NULL, aes(x = 0.8, y = max(dens_fast$ymax, na.rm = TRUE) + 0.01), label = "fast", color = "#3B0F70") +
-      coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
-      labs(x = "Possible Check Rates", y = "Optimality") +
-      theme_classic() +
-      theme(legend.position = "none",
-            plot.background = element_rect(fill = "transparent", color = NA),
-            panel.background = element_rect(fill = "transparent", color = NA))
+    # ggplotly(plt, tooltip = "text") %>% 
+    #   toWebGL() %>%
+    #   highlight(on = "plotly_hover", off = "plotly_doubleclick", color = "cyan", persistent = FALSE) %>%
+    #   layout(paper_bgcolor = 'rgba(0,0,0,0)', plot_bgcolor = 'rgba(0,0,0,0)')
     
-    ggplotly(plt, tooltip = "text") %>% 
-      toWebGL() %>%
-      highlight(on = "plotly_hover", off = "plotly_doubleclick", color = "cyan", persistent = FALSE) %>%
-      layout(paper_bgcolor = 'rgba(0,0,0,0)', plot_bgcolor = 'rgba(0,0,0,0)')
+    ggplotly(full_data$e2$figs$curves, tooltip = "text") 
   })
   
-  ### e3_correlation ----
+  ### e2_correlation ----
   output$e2_correlation <- renderPlotly({
     
-    plt_corr <- ggplot(shared_e2_reg, aes(x = check_at_opt, y = CC_pred, group = ID, color = ID,
-                                          text = paste0(
-                                            "ID: ", ID, "\n",
-                                            "slope: ", round(slope, 2)
-                                          ))) +
-      geom_abline(intercept = 0, slope = 1, linetype = "dotted") +
-      geom_line() +
-      scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
-      coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
-      labs(x = "Model Optimal Rate", y = "Observed Rate") +
-      theme_classic() +
-      theme(legend.position = "none",
-            plot.background = element_rect(fill = "transparent", color = NA),
-            panel.background = element_rect(fill = "transparent", color = NA))
-    
+    # plt_corr <- ggplot(shared_e2_reg, aes(x = check_at_opt, y = CC_pred, group = ID, color = ID,
+    #                                       text = paste0(
+    #                                         "ID: ", ID, "\n",
+    #                                         "slope: ", round(slope, 2)
+    #                                       ))) +
+    #   geom_abline(intercept = 0, slope = 1, linetype = "dotted") +
+    #   geom_line() +
+    #   scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
+    #   coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
+    #   labs(x = "Model Optimal Rate", y = "Observed Rate") +
+    #   theme_classic() +
+    #   theme(legend.position = "none",
+    #         plot.background = element_rect(fill = "transparent", color = NA),
+    #         panel.background = element_rect(fill = "transparent", color = NA))
+    # 
     
     # plt_corr <- ggplot(shared_e3_reg, aes(x = check_at_opt, y = CC, group = ID, color = ID,
     #                                       text = paste0(
@@ -1779,67 +1891,78 @@ server <- function(input, output) {
     #         panel.background = element_rect(fill = "transparent", color = NA))
     
     
-    ggplotly(plt_corr, tooltip = "text") %>%
-      toWebGL() %>%
-      highlight(on = "plotly_hover",  off = "plotly_deselect", color = "cyan", persistent = FALSE) %>%
-      layout(paper_bgcolor = 'rgba(0,0,0,0)', plot_bgcolor = 'rgba(0,0,0,0)')
+    # ggplotly(plt_corr, tooltip = "text") %>%
+    #   toWebGL() %>%
+    #   highlight(on = "plotly_hover",  off = "plotly_deselect", color = "cyan", persistent = FALSE) %>%
+    #   layout(paper_bgcolor = 'rgba(0,0,0,0)', plot_bgcolor = 'rgba(0,0,0,0)')
+    
+    ggplotly(full_data$e2$figs$lines, tooltip = "text") 
+    
   })
+  
   
   ### e3_optimality_curves ----
   output$e3_optimality_curves <- renderPlotly({
+    # 
+    # exp <- full_data$e3
+    # agg <- exp$agg
+    # dens_fast <- exp$dens$fast
+    # dens_slow <- exp$dens$slow
     
-    exp <- full_data$e3
-    agg <- exp$agg
-    dens_fast <- exp$dens$fast
-    dens_slow <- exp$dens$slow
+    # plt <- ggplot(shared_e3, aes(x = probabilities, y = rel_reward, group = interaction(ID, group), color = Rate, 
+    #                              text = paste0(
+    #                                "ID: ", ID, "\n",
+    #                                "RT not checking: ", round(RT_nCC, 2), "\n",
+    #                                "RT checking: ", round(RT_CC, 2), "\n",
+    #                                "Cost: ", round((RT_CC-RT_nCC)/RT_nCC, 2), "\n",
+    #                                "Optimum: ", round(check_at_opt, 2)
+    #                              )))+
+    #   geom_line(alpha = 0.5, lwd = 0.2) +
+    #   geom_ribbon(data = dens_slow, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
+    #   geom_ribbon(data = dens_fast, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
+    #   geom_point(data = agg %>% filter(Rate == 0), aes(x = mean_opt, y = 0.1), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
+    #   geom_point(data = agg %>% filter(Rate == 1), aes(x = mean_opt, y = 0.2), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
+    #   scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
+    #   scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
+    #   geom_text(data = NULL, aes(x = 0.8, y = max(dens_slow$ymax, na.rm = TRUE) + 0.01), label = "slow", color = "#FE9F6D") +
+    #   geom_text(data = NULL, aes(x = 0.8, y = max(dens_fast$ymax, na.rm = TRUE) + 0.01), label = "fast", color = "#3B0F70") +
+    #   coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
+    #   labs(x = "Possible Check Rates", y = "Optimality") +
+    #   theme_classic() +
+    #   theme(legend.position = "none",
+    #         plot.background = element_rect(fill = "transparent", color = NA),
+    #         panel.background = element_rect(fill = "transparent", color = NA))
+    # 
+    # ggplotly(plt, tooltip = "text") %>% 
+    #   toWebGL() %>%
+    #   highlight(on = "plotly_hover", off = "plotly_doubleclick", color = "cyan", persistent = FALSE) %>%
+    #   layout(paper_bgcolor = 'rgba(0,0,0,0)', plot_bgcolor = 'rgba(0,0,0,0)')
     
-    plt <- ggplot(shared_e3, aes(x = probabilities, y = rel_reward, group = interaction(ID, group), color = Rate, 
-                                 text = paste0(
-                                   "ID: ", ID, "\n",
-                                   "RT not checking: ", round(RT_nCC, 2), "\n",
-                                   "RT checking: ", round(RT_CC, 2), "\n",
-                                   "Cost: ", round((RT_CC-RT_nCC)/RT_nCC, 2), "\n",
-                                   "Optimum: ", round(check_at_opt, 2)
-                                 )))+
-      geom_line(alpha = 0.5, lwd = 0.2) +
-      geom_ribbon(data = dens_slow, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
-      geom_ribbon(data = dens_fast, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
-      geom_point(data = agg %>% filter(Rate == 0), aes(x = mean_opt, y = 0.1), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
-      geom_point(data = agg %>% filter(Rate == 1), aes(x = mean_opt, y = 0.2), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
-      scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
-      scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
-      geom_text(data = NULL, aes(x = 0.8, y = max(dens_slow$ymax, na.rm = TRUE) + 0.01), label = "slow", color = "#FE9F6D") +
-      geom_text(data = NULL, aes(x = 0.8, y = max(dens_fast$ymax, na.rm = TRUE) + 0.01), label = "fast", color = "#3B0F70") +
-      coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
-      labs(x = "Possible Check Rates", y = "Optimality") +
-      theme_classic() +
-      theme(legend.position = "none",
-            plot.background = element_rect(fill = "transparent", color = NA),
-            panel.background = element_rect(fill = "transparent", color = NA))
-    
-    ggplotly(plt, tooltip = "text") %>% 
-      toWebGL() %>%
-      highlight(on = "plotly_hover", off = "plotly_doubleclick", color = "cyan", persistent = FALSE) %>%
-      layout(paper_bgcolor = 'rgba(0,0,0,0)', plot_bgcolor = 'rgba(0,0,0,0)')
+    ggplotly(full_data$e3$figs$curves, tooltip = "text") 
   })
+  
+  
   
   ### e3_correlation ----
   output$e3_correlation <- renderPlotly({
     
-    plt_corr <- ggplot(shared_e3_reg, aes(x = check_at_opt, y = CC_pred, group = ID, color = ID,
-                                          text = paste0(
-                                            "ID: ", ID, "\n",
-                                            "slope: ", round(slope, 2)
-                                          ))) +
-      geom_abline(intercept = 0, slope = 1, linetype = "dotted") +
-      geom_line() +
-      scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
-      coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
-      labs(x = "Model Optimal Rate", y = "Observed Rate") +
-      theme_classic() +
-      theme(legend.position = "none",
-            plot.background = element_rect(fill = "transparent", color = NA),
-            panel.background = element_rect(fill = "transparent", color = NA))
+    
+    
+    
+    # plt_corr <- ggplot(shared_e3_reg, aes(x = check_at_opt, y = CC_pred, group = ID, color = ID,
+    #                                       text = paste0(
+    #                                         "ID: ", ID, "\n",
+    #                                         "slope: ", round(slope, 2)
+    #                                       ))) +
+    #   geom_abline(intercept = 0, slope = 1, linetype = "dotted") +
+    #   geom_line() +
+    #   scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
+    #   coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
+    #   labs(x = "Model Optimal Rate", y = "Observed Rate") +
+    #   theme_classic() +
+    #   theme(legend.position = "none",
+    #         plot.background = element_rect(fill = "transparent", color = NA),
+    #         panel.background = element_rect(fill = "transparent", color = NA))
     
     
     # plt_corr <- ggplot(shared_e3_reg, aes(x = check_at_opt, y = CC, group = ID, color = ID,
@@ -1858,10 +1981,13 @@ server <- function(input, output) {
     #         panel.background = element_rect(fill = "transparent", color = NA))
     
     
-    ggplotly(plt_corr, tooltip = "text") %>%
-      toWebGL() %>%
-      highlight(on = "plotly_hover",  off = "plotly_deselect", color = "cyan", persistent = FALSE) %>%
-      layout(paper_bgcolor = 'rgba(0,0,0,0)', plot_bgcolor = 'rgba(0,0,0,0)')
+    # ggplotly(plt_corr, tooltip = "text") %>%
+    #   toWebGL() %>%
+    #   highlight(on = "plotly_hover",  off = "plotly_deselect", color = "cyan", persistent = FALSE) %>%
+    #   layout(paper_bgcolor = 'rgba(0,0,0,0)', plot_bgcolor = 'rgba(0,0,0,0)')
+    
+    
+    ggplotly(full_data$e3$figs$lines, tooltip = "text") 
   })
   
   
