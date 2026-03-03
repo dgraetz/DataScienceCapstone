@@ -1,8 +1,3 @@
-#To do:
-#include equations
-#would be nice to highlight columns with different input values
-
-
 library(bslib)
 library(shiny)
 library(tidyverse)
@@ -13,6 +8,14 @@ library(shinycssloaders)
 library(lmerTest)
 
 source("vectorized_simulation_v2.R")
+
+shinyLink <- function(to, label) {
+  actionLink(
+    inputId = paste0("link_to_", to), # Create a unique ID
+    label = label,
+    class = "shiny__link"
+  )
+}
 
 full_data <- readRDS("empirical_data/full_data.RDS")
 
@@ -277,7 +280,8 @@ ui <- page_navbar(
   
   
   ## Welcome page ----
-  nav_panel("Welcome",
+  nav_panel(title = "Welcome",
+            value = "welcome",
             icon = icon("house"),
             
             div(
@@ -301,6 +305,7 @@ ui <- page_navbar(
                 `aria-label` = "Close"
               )
             ),
+            
             markdown("
 
 # Welcome
@@ -547,6 +552,19 @@ You can read more about our work on our [lab website](https://blogs.uoregon.edu/
                       withMathJax(
                         tags$div(
                           
+                          markdown(
+                            "This page is designed to compare a Monte-Carlo simulation with our computational model. The key idea of this model model is that the relative payoff for different run lengths of trials (e. g., run length of 1 means checking in every trial or 100 %, 2 would be 50 %, 3 would be 33 % and so forth is compared. The simulation and computational model agree very nicely in their predictions.
+                            
+                            ### Simulation
+                            
+                            The simulation that can be plotted here generates task sequences and the simulates an agent performing with a stochastic check rate, and assigns corresponding _RTs_ to simulated trials with and without cue checks, assigns gains and losses for simulated correct and incorrect trials, and then summarizes the iteration in the payoff.
+                            
+                            
+                            ### Computational Model
+                            
+                            The model calculates the payoff for all attentional strategies such that one can visualize the optimality curve. It takes into account the probability of a task switch, _p_, the gains _g_ per correct trial and losses _l_ for incorrect trials. To compute the relative time cost, individual _RTs_ for trials with and without cue checks are needed. To interpolate over the entire block duration, the duration of the inter-trial-interval and the total block duration are needed."
+                          ),
+                          
                           # 1. Probability of task staying the same
                           p("First, we calculate the probability that the task remains the same at trial \\(n\\):"),
                           p("$$p_{same}(n) = \\frac{1}{2} [1 + (1 - 2p)^n]$$"),
@@ -768,6 +786,59 @@ You can read more about our work on our [lab website](https://blogs.uoregon.edu/
                     
                     nav_panel(
                       "Help & Model Info",
+                      withMathJax(
+                        tags$div(
+                          
+                          markdown(
+                            "This page is designed to compare a Monte-Carlo simulation with our computational model. The key idea of this model model is that the relative payoff for different run lengths of trials (e. g., run length of 1 means checking in every trial or 100 %, 2 would be 50 %, 3 would be 33 % and so forth is compared. 
+                            
+                            ### Simulation
+                            
+                            The simulation that can be generated here plots generates task sequences and the simulates an agent performing with a stochastic check rate, and assigns corresponding _RTs_ to simulated trials with and without cue checks, assigns gains and losses for simulated correct and incorrect trials, and then summarizes the iteration in the payoff.
+                            
+                            
+                            ### Computational Model
+                            
+                            The model calculates the payoff for all attentional strategies such that one can visualize the optimality curve. It takes into account the probability of a task switch, _p_, the gains _g_ per correct trial and losses _l_ for incorrect trials. To compute the relative time cost, individual _RTs_ for trials with and without cue checks are needed. To interpolate over the entire block duration, the duration of the inter-trial-interval and the total block duration are needed."
+                          ),
+                          
+                          # 1. Probability of task staying the same
+                          p("First, we calculate the probability that the task remains the same at trial \\(n\\):"),
+                          p("$$p_{same}(n) = \\frac{1}{2} [1 + (1 - 2p)^n]$$"),
+                          
+                          # 2. Payoff on Non-Check (PONC)
+                          p("The expected payoff for a single trial \\(n\\) without checking:"),
+                          p("$$PONC_n = p_{same}(n) g + (1 - p_{same}(n)) l$$"),
+                          p("Where \\(g\\) is gain and \\(l\\) is loss."),
+                          br(),
+                          
+                          # 3. Average Payoff on Non-Check (APONC)
+                          p("The average payoff over a run of length \\(r\\) without checking:"),
+                          p("$$APONC_r = \\frac{1}{r} \\sum_{n=1}^{r} PONC_n$$"),
+                          
+                          # 4. Average Payoff on Check (APOC)
+                          p("If a check occurs on the last trial (guaranteeing a win), the average payoff is:"),
+                          p("$$APOC_r = \\frac{1}{r} (\\sum_{n=1}^{r-1} PONC_n + g)$$"),
+                          
+                          # 5. Cost Coefficient (CC)
+                          p("We calculate a time-cost multiplier based on RT, ITI, and check duration:"),
+                          p("$$CC_r = \\frac{RT + ITI + \\frac{CT+D}{r}}{RT + ITI}$$"),
+                          
+                          # 6. Adjusted Payoff (APOCTA)
+                          p("The average payoff of checking is adjusted by this time cost:"),
+                          p("$$APOCTA_r = \\frac{APOC_r}{CC_r}$$"),
+                          
+                          # 7. Net Value (PNCC)
+                          p("Finally, we compare the relative payoff of NOT checking vs. checking:"),
+                          p("$$PNCC_r = APONC_r - APOCTA_r$$"),
+                          
+                          # 8. Decision Rule
+                          
+                          p("Decision Policy:"),
+                          p("If \\(PNCC_r < 0\\), the optimal strategy is to check (Cue Fixation).")
+                          
+                        )
+                      )
                     )
                   )
                 )
@@ -789,6 +860,7 @@ You can read more about our work on our [lab website](https://blogs.uoregon.edu/
                           col_widths = c(6, 5),
                           card(
                             card_header("Project Overview"),
+                            shinyLink("welcome", label = "Link To Welcome Page"),
                             markdown("
 
 
@@ -1058,7 +1130,14 @@ task environments.
 
 # server ----
 
-server <- function(input, output) {
+server <- function(input, output, session) {
+  
+  
+  ## links ----
+  
+  observeEvent(input$link_to_welcome, {
+    updateNavbarPage(session, "main_nav", selected = "welcome")
+  })
   
   ## standardtask ----
   ### params ----
@@ -1733,212 +1812,33 @@ server <- function(input, output) {
   ### e1_optimality_curves ----
   output$e1_optimality_curves <- renderPlotly({
     
-    # exp <- full_data$e1
-    # agg <- exp$agg
-    # dens_fast <- exp$dens$fast
-    # dens_slow <- exp$dens$slow
-    # 
-    # plt <- ggplot(shared_e1, aes(x = probabilities, y = rel_reward, group = interaction(ID, group), color = Rate, 
-    #                              text = paste0(
-    #                                "ID: ", ID, "\n",
-    #                                "RT not checking: ", round(RT_nCC, 2), "\n",
-    #                                "RT checking: ", round(RT_CC, 2), "\n",
-    #                                "Cost: ", round((RT_CC-RT_nCC)/RT_nCC, 2), "\n",
-    #                                "Optimum: ", round(check_at_opt, 2)
-    #                              )))+
-    #   geom_line(alpha = 0.5, lwd = 0.2) +
-    #   geom_ribbon(data = dens_slow, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
-    #   geom_ribbon(data = dens_fast, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
-    #   geom_point(data = agg %>% filter(Rate == 0), aes(x = mean_opt, y = 0.1), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
-    #   geom_point(data = agg %>% filter(Rate == 1), aes(x = mean_opt, y = 0.2), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
-    #   scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
-    #   scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
-    #   geom_text(data = NULL, aes(x = 0.8, y = max(dens_slow$ymax, na.rm = TRUE) + 0.01), label = "slow", color = "#FE9F6D") +
-    #   geom_text(data = NULL, aes(x = 0.8, y = max(dens_fast$ymax, na.rm = TRUE) + 0.01), label = "fast", color = "#3B0F70") +
-    #   coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
-    #   labs(x = "Possible Check Rates", y = "Optimality") +
-    #   theme_classic() +
-    #   theme(legend.position = "none",
-    #         plot.background = element_rect(fill = "transparent", color = NA),
-    #         panel.background = element_rect(fill = "transparent", color = NA))
-    
-    
-    # ggplotly(plt, tooltip = "text") %>% 
-    #   toWebGL() %>%
-    #   highlight(on = "plotly_hover", off = "plotly_doubleclick", color = "cyan", persistent = FALSE) %>%
-    #   layout(paper_bgcolor = 'rgba(0,0,0,0)', plot_bgcolor = 'rgba(0,0,0,0)')
-    
-    
-    ggplotly(full_data$e1$figs$curves, tooltip = "text") 
+    full_data$e1$figs$curves %>% toWebGL()
   })
   
   ### e1_correlation ----
   output$e1_correlation <- renderPlotly({
     
-    # plt_corr <- ggplot(shared_e1_reg, aes(x = check_at_opt, y = CC_pred, group = ID, color = ID,
-    #                                       text = paste0(
-    #                                         "ID: ", ID, "\n",
-    #                                         "slope: ", round(slope, 2)
-    #                                       ))) +
-    #   geom_abline(intercept = 0, slope = 1, linetype = "dotted") +
-    #   geom_line() +
-    #   scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
-    #   coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
-    #   labs(x = "Model Optimal Rate", y = "Observed Rate") +
-    #   theme_classic() +
-    #   theme(legend.position = "none",
-    #         plot.background = element_rect(fill = "transparent", color = NA),
-    #         panel.background = element_rect(fill = "transparent", color = NA))
-    
-    
-    # plt_corr <- ggplot(shared_e3_reg, aes(x = check_at_opt, y = CC, group = ID, color = ID,
-    #                                       text = paste0(
-    #                                         "ID: ", ID, "\n",
-    #                                         "slope: ", round(slope, 2)
-    #                                       ))) +
-    #   geom_abline(intercept = 0, slope = 1, linetype = "dotted") +
-    #   geom_smooth(method = "lm", se = FALSE) + # Individual subject regression lines/slopes
-    #   scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
-    #   coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
-    #   labs(x = "Model Optimal Rate", y = "Observed Rate") +
-    #   theme_classic() +
-    #   theme(legend.position = "none",
-    #         plot.background = element_rect(fill = "transparent", color = NA),
-    #         panel.background = element_rect(fill = "transparent", color = NA))
-    # 
-    # 
-    # ggplotly(plt_corr, tooltip = "text") %>%
-    #   toWebGL() %>%
-    #   highlight(on = "plotly_hover",  off = "plotly_deselect", color = "cyan", persistent = FALSE) %>%
-    #   layout(paper_bgcolor = 'rgba(0,0,0,0)', plot_bgcolor = 'rgba(0,0,0,0)')
-    
-    
-    ggplotly(full_data$e1$figs$lines, tooltip = "text") 
+    full_data$e1$figs$lines %>% toWebGL()
   })
   
   ### e2_optimality_curves ----
   output$e2_optimality_curves <- renderPlotly({
     
-    # exp <- full_data$e2
-    # agg <- exp$agg
-    # dens_fast <- exp$dens$fast
-    # dens_slow <- exp$dens$slow
-    # 
-    # plt <- ggplot(shared_e2, aes(x = probabilities, y = rel_reward, group = interaction(ID, group), color = Rate, 
-    #                              text = paste0(
-    #                                "ID: ", ID, "\n",
-    #                                "RT not checking: ", round(RT_nCC, 2), "\n",
-    #                                "RT checking: ", round(RT_CC, 2), "\n",
-    #                                "Cost: ", round((RT_CC-RT_nCC)/RT_nCC, 2), "\n",
-    #                                "Optimum: ", round(check_at_opt, 2)
-    #                              )))+
-    #   geom_line(alpha = 0.5, lwd = 0.2) +
-    #   geom_ribbon(data = dens_slow, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
-    #   geom_ribbon(data = dens_fast, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
-    #   geom_point(data = agg %>% filter(Rate == 0), aes(x = mean_opt, y = 0.1), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
-    #   geom_point(data = agg %>% filter(Rate == 1), aes(x = mean_opt, y = 0.2), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
-    #   scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
-    #   scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
-    #   geom_text(data = NULL, aes(x = 0.8, y = max(dens_slow$ymax, na.rm = TRUE) + 0.01), label = "slow", color = "#FE9F6D") +
-    #   geom_text(data = NULL, aes(x = 0.8, y = max(dens_fast$ymax, na.rm = TRUE) + 0.01), label = "fast", color = "#3B0F70") +
-    #   coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
-    #   labs(x = "Possible Check Rates", y = "Optimality") +
-    #   theme_classic() +
-    #   theme(legend.position = "none",
-    #         plot.background = element_rect(fill = "transparent", color = NA),
-    #         panel.background = element_rect(fill = "transparent", color = NA))
-    
-    # ggplotly(plt, tooltip = "text") %>% 
-    #   toWebGL() %>%
-    #   highlight(on = "plotly_hover", off = "plotly_doubleclick", color = "cyan", persistent = FALSE) %>%
-    #   layout(paper_bgcolor = 'rgba(0,0,0,0)', plot_bgcolor = 'rgba(0,0,0,0)')
-    
-    ggplotly(full_data$e2$figs$curves, tooltip = "text") 
+    full_data$e2$figs$curves %>% toWebGL()
   })
   
   ### e2_correlation ----
   output$e2_correlation <- renderPlotly({
     
-    # plt_corr <- ggplot(shared_e2_reg, aes(x = check_at_opt, y = CC_pred, group = ID, color = ID,
-    #                                       text = paste0(
-    #                                         "ID: ", ID, "\n",
-    #                                         "slope: ", round(slope, 2)
-    #                                       ))) +
-    #   geom_abline(intercept = 0, slope = 1, linetype = "dotted") +
-    #   geom_line() +
-    #   scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
-    #   coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
-    #   labs(x = "Model Optimal Rate", y = "Observed Rate") +
-    #   theme_classic() +
-    #   theme(legend.position = "none",
-    #         plot.background = element_rect(fill = "transparent", color = NA),
-    #         panel.background = element_rect(fill = "transparent", color = NA))
-    # 
-    
-    # plt_corr <- ggplot(shared_e3_reg, aes(x = check_at_opt, y = CC, group = ID, color = ID,
-    #                                       text = paste0(
-    #                                         "ID: ", ID, "\n",
-    #                                         "slope: ", round(slope, 2)
-    #                                       ))) +
-    #   geom_abline(intercept = 0, slope = 1, linetype = "dotted") +
-    #   geom_smooth(method = "lm", se = FALSE) + # Individual subject regression lines/slopes
-    #   scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
-    #   coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
-    #   labs(x = "Model Optimal Rate", y = "Observed Rate") +
-    #   theme_classic() +
-    #   theme(legend.position = "none",
-    #         plot.background = element_rect(fill = "transparent", color = NA),
-    #         panel.background = element_rect(fill = "transparent", color = NA))
-    
-    
-    # ggplotly(plt_corr, tooltip = "text") %>%
-    #   toWebGL() %>%
-    #   highlight(on = "plotly_hover",  off = "plotly_deselect", color = "cyan", persistent = FALSE) %>%
-    #   layout(paper_bgcolor = 'rgba(0,0,0,0)', plot_bgcolor = 'rgba(0,0,0,0)')
-    
-    ggplotly(full_data$e2$figs$lines, tooltip = "text") 
+    full_data$e2$figs$lines %>% toWebGL()
     
   })
   
   
   ### e3_optimality_curves ----
   output$e3_optimality_curves <- renderPlotly({
-    # 
-    # exp <- full_data$e3
-    # agg <- exp$agg
-    # dens_fast <- exp$dens$fast
-    # dens_slow <- exp$dens$slow
     
-    # plt <- ggplot(shared_e3, aes(x = probabilities, y = rel_reward, group = interaction(ID, group), color = Rate, 
-    #                              text = paste0(
-    #                                "ID: ", ID, "\n",
-    #                                "RT not checking: ", round(RT_nCC, 2), "\n",
-    #                                "RT checking: ", round(RT_CC, 2), "\n",
-    #                                "Cost: ", round((RT_CC-RT_nCC)/RT_nCC, 2), "\n",
-    #                                "Optimum: ", round(check_at_opt, 2)
-    #                              )))+
-    #   geom_line(alpha = 0.5, lwd = 0.2) +
-    #   geom_ribbon(data = dens_slow, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
-    #   geom_ribbon(data = dens_fast, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
-    #   geom_point(data = agg %>% filter(Rate == 0), aes(x = mean_opt, y = 0.1), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
-    #   geom_point(data = agg %>% filter(Rate == 1), aes(x = mean_opt, y = 0.2), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
-    #   scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
-    #   scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
-    #   geom_text(data = NULL, aes(x = 0.8, y = max(dens_slow$ymax, na.rm = TRUE) + 0.01), label = "slow", color = "#FE9F6D") +
-    #   geom_text(data = NULL, aes(x = 0.8, y = max(dens_fast$ymax, na.rm = TRUE) + 0.01), label = "fast", color = "#3B0F70") +
-    #   coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
-    #   labs(x = "Possible Check Rates", y = "Optimality") +
-    #   theme_classic() +
-    #   theme(legend.position = "none",
-    #         plot.background = element_rect(fill = "transparent", color = NA),
-    #         panel.background = element_rect(fill = "transparent", color = NA))
-    # 
-    # ggplotly(plt, tooltip = "text") %>% 
-    #   toWebGL() %>%
-    #   highlight(on = "plotly_hover", off = "plotly_doubleclick", color = "cyan", persistent = FALSE) %>%
-    #   layout(paper_bgcolor = 'rgba(0,0,0,0)', plot_bgcolor = 'rgba(0,0,0,0)')
-    
-    ggplotly(full_data$e3$figs$curves, tooltip = "text") 
+    full_data$e3$figs$curves %>% toWebGL()
   })
   
   
@@ -1946,48 +1846,7 @@ server <- function(input, output) {
   ### e3_correlation ----
   output$e3_correlation <- renderPlotly({
     
-    
-    
-    
-    # plt_corr <- ggplot(shared_e3_reg, aes(x = check_at_opt, y = CC_pred, group = ID, color = ID,
-    #                                       text = paste0(
-    #                                         "ID: ", ID, "\n",
-    #                                         "slope: ", round(slope, 2)
-    #                                       ))) +
-    #   geom_abline(intercept = 0, slope = 1, linetype = "dotted") +
-    #   geom_line() +
-    #   scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
-    #   coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
-    #   labs(x = "Model Optimal Rate", y = "Observed Rate") +
-    #   theme_classic() +
-    #   theme(legend.position = "none",
-    #         plot.background = element_rect(fill = "transparent", color = NA),
-    #         panel.background = element_rect(fill = "transparent", color = NA))
-    
-    
-    # plt_corr <- ggplot(shared_e3_reg, aes(x = check_at_opt, y = CC, group = ID, color = ID,
-    #                                       text = paste0(
-    #                                         "ID: ", ID, "\n",
-    #                                         "slope: ", round(slope, 2)
-    #                                       ))) +
-    #   geom_abline(intercept = 0, slope = 1, linetype = "dotted") +
-    #   geom_smooth(method = "lm", se = FALSE) + # Individual subject regression lines/slopes
-    #   scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
-    #   coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
-    #   labs(x = "Model Optimal Rate", y = "Observed Rate") +
-    #   theme_classic() +
-    #   theme(legend.position = "none",
-    #         plot.background = element_rect(fill = "transparent", color = NA),
-    #         panel.background = element_rect(fill = "transparent", color = NA))
-    
-    
-    # ggplotly(plt_corr, tooltip = "text") %>%
-    #   toWebGL() %>%
-    #   highlight(on = "plotly_hover",  off = "plotly_deselect", color = "cyan", persistent = FALSE) %>%
-    #   layout(paper_bgcolor = 'rgba(0,0,0,0)', plot_bgcolor = 'rgba(0,0,0,0)')
-    
-    
-    ggplotly(full_data$e3$figs$lines, tooltip = "text") 
+    full_data$e3$figs$lines %>% toWebGL()
   })
   
   

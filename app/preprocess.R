@@ -24,7 +24,9 @@ opt_e1_lines <- opt_e1 %>%
   group_by(ID, Rate, SwitchP, Delay, Placeh) %>%
   mutate(opt_check = earnings[earnings == max(earnings)],
          max_earnings = max(earnings),
-         rel_reward = earnings/max_earnings) %>%
+         rel_reward = earnings/max_earnings,
+         RT_nCC = RT_nCC/1000,
+         RT_CC = RT_CC/1000) %>%
   ungroup()
 
 
@@ -75,13 +77,17 @@ e1_fig_curves <- ggplot(opt_e1_lines, aes(x = probabilities, y = rel_reward, gro
                        labels = c("0" = "fast",
                                   "1" = "slow"), 
                        name = "Rate:") +
-  geom_text(data = NULL, aes(x = 0.8, y = max(e3_dens_slow$ymax, na.rm = TRUE) + 0.01), label = "slow", color = "#FE9F6D") +
-  geom_text(data = NULL, aes(x = 0.8, y = max(e3_dens_fast$ymax, na.rm = TRUE) + 0.01), label = "fast", color = "#3B0F70") +
+  geom_text(data = NULL, aes(x = 0.8, y = max(e1_dens_slow$ymax, na.rm = TRUE) + 0.01), label = "slow", color = "#FE9F6D") +
+  geom_text(data = NULL, aes(x = 0.7, y = max(e1_dens_fast$ymin, na.rm = TRUE) - 0.05), label = "fast", color = "#3B0F70") +
   coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
   labs(x = "Possible Check Rates", y = "Optimality") +
   theme_classic()  +
-  theme(legend.position = "top")
+  theme(legend.position = "none")
 e1_fig_curves
+
+
+
+
 
 e1_fig_slopes <- ggplot(opt_e1, aes(x = check_at_opt, y = CC_pred, group = ID, color = ID,
                                     text = paste0(
@@ -102,8 +108,8 @@ full_data$e1 <- list(reg = opt_e1,
                      dens = list(fast = e1_dens_fast,
                                  slow = e1_dens_slow),
                      agg = opt_e1_lines_agg,
-                     figs = list(curves = e1_fig_curves,
-                                 lines = e1_fig_slopes))
+                     figs = list(curves = e1_fig_curves %>% ggplotly(., tooltip = "text"),
+                                 lines = e1_fig_slopes %>% ggplotly(., tooltip = "text")))
 
 
 # preprocess e2----
@@ -124,7 +130,9 @@ opt_e2_lines <- opt_e2 %>%
   group_by(ID, Rate, SwitchP, Placeh) %>%
   mutate(opt_check = earnings[earnings == max(earnings)],
          max_earnings = max(earnings),
-         rel_reward = earnings/max_earnings) %>%
+         rel_reward = earnings/max_earnings,
+         RT_nCC = RT_nCC/1000,
+         RT_CC = RT_CC/1000) %>%
   ungroup()
 
 # calculate densities for each condition
@@ -176,11 +184,11 @@ e2_fig_curves <- ggplot(opt_e2_lines, aes(x = probabilities, y = rel_reward, gro
                                   "1" = "slow"), 
                        name = "Rate:") +
   geom_text(data = NULL, aes(x = 0.8, y = max(e2_dens_slow$ymax, na.rm = TRUE) + 0.01), label = "slow", color = "#FE9F6D") +
-  geom_text(data = NULL, aes(x = 0.8, y = max(e2_dens_fast$ymax, na.rm = TRUE) + 0.01), label = "fast", color = "#3B0F70") +
+  geom_text(data = NULL, aes(x = 0.8, y = max(e2_dens_fast$ymin, na.rm = TRUE) - 0.05), label = "fast", color = "#3B0F70") +
   coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
   labs(x = "Possible Check Rates", y = "Optimality") +
   theme_classic() + 
-  theme(legend.position = "top")
+  theme(legend.position = "none")
 e2_fig_curves
 
 e2_fig_slopes <- ggplot(opt_e2, aes(x = check_at_opt, y = CC_pred, group = ID, color = ID,
@@ -203,8 +211,8 @@ full_data$e2 <- list(reg = opt_e2,
                      dens = list(fast = e2_dens_fast,
                                  slow = e2_dens_slow),
                      agg = opt_e2_lines_agg,
-                     figs = list(curves = e2_fig_curves,
-                                 lines = e2_fig_slopes))
+                     figs = list(curves = e2_fig_curves %>% ggplotly(., tooltip = "text"),
+                                 lines = e2_fig_slopes %>% ggplotly(., tooltip = "text")))
 
 
 # preprocess e3----
@@ -273,12 +281,12 @@ e3_fig_curves <- ggplot(opt_e3_lines, aes(x = probabilities, y = rel_reward, gro
                        labels = c("0" = "fast",
                                   "1" = "slow"), 
                        name = "Rate:") +
-  geom_text(data = NULL, aes(x = 0.8, y = max(e3_dens_slow$ymax, na.rm = TRUE) + 0.01), label = "slow", color = "#FE9F6D") +
-  geom_text(data = NULL, aes(x = 0.8, y = max(e3_dens_fast$ymax, na.rm = TRUE) + 0.01), label = "fast", color = "#3B0F70") +
+  geom_text(data = NULL, aes(x = 0.7, y = max(e3_dens_slow$ymax, na.rm = TRUE) + 0.01), label = "slow", color = "#FE9F6D") +
+  geom_text(data = NULL, aes(x = 0.6, y = max(e3_dens_fast$ymin, na.rm = TRUE) - 0.05), label = "fast", color = "#3B0F70") +
   coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
   labs(x = "Possible Check Rates", y = "Optimality") +
   theme_classic()  +
-  theme(legend.position = "top")
+  theme(legend.position = "none")
 e3_fig_curves
 
 e3_fig_slopes <- ggplot(opt_e3_lines, aes(x = check_at_opt, y = CC_pred, group = ID, color = ID,
@@ -299,7 +307,7 @@ full_data$e3 <- list(reg = opt_e3,
                      dens = list(fast = e3_dens_fast,
                                  slow = e3_dens_slow),
                      agg = opt_e3_lines_agg,
-                     figs = list(curves = e3_fig_curves,
-                                 lines = e3_fig_slopes))
+                     figs = list(curves = e3_fig_curves %>% ggplotly(., tooltip = "text"),
+                                 lines = e3_fig_slopes %>% ggplotly(., tooltip = "text")))
 
 saveRDS(full_data, "app/empirical_data/full_data.RDS")
