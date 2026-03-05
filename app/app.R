@@ -19,14 +19,14 @@ shinyLink <- function(to, label) {
 
 full_data <- readRDS("empirical_data/full_data.RDS")
 
-shared_e1 <- crosstalk::SharedData$new(full_data$e1$lines, key = ~ID, group = "exp1")
-shared_e1_reg <- crosstalk::SharedData$new(full_data$e1$reg, key = ~ID, group = "exp1")
-
-shared_e2 <- crosstalk::SharedData$new(full_data$e2$lines, key = ~ID, group = "exp2")
-shared_e2_reg <- crosstalk::SharedData$new(full_data$e2$reg, key = ~ID, group = "exp2")
-
-shared_e3 <- crosstalk::SharedData$new(full_data$e3$lines, key = ~ID, group = "exp3")
-shared_e3_reg <- crosstalk::SharedData$new(full_data$e3$reg, key = ~ID, group = "exp3")
+# shared_e1 <- crosstalk::SharedData$new(full_data$e1$lines, key = ~ID, group = "exp1")
+# shared_e1_reg <- crosstalk::SharedData$new(full_data$e1$reg, key = ~ID, group = "exp1")
+# 
+# shared_e2 <- crosstalk::SharedData$new(full_data$e2$lines, key = ~ID, group = "exp2")
+# shared_e2_reg <- crosstalk::SharedData$new(full_data$e2$reg, key = ~ID, group = "exp2")
+# 
+# shared_e3 <- crosstalk::SharedData$new(full_data$e3$lines, key = ~ID, group = "exp3")
+# shared_e3_reg <- crosstalk::SharedData$new(full_data$e3$reg, key = ~ID, group = "exp3")
 
 
 

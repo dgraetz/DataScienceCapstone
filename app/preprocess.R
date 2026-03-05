@@ -1,4 +1,5 @@
 library(tidyverse)
+library(plotly)
 opt_e1 <- readRDS("app/empirical_data/e1_optimality.RDS")
 opt_e2 <- readRDS("app/empirical_data/e2_optimality.RDS")
 opt_e3 <- readRDS("app/empirical_data/e3_optimality.RDS")
@@ -103,11 +104,11 @@ e1_fig_slopes <- ggplot(opt_e1, aes(x = check_at_opt, y = CC_pred, group = ID, c
   theme(legend.position = "none")
 
 
-full_data$e1 <- list(reg = opt_e1,
-                     lines = opt_e1_lines,
-                     dens = list(fast = e1_dens_fast,
-                                 slow = e1_dens_slow),
-                     agg = opt_e1_lines_agg,
+full_data$e1 <- list(#reg = opt_e1,
+                     #lines = opt_e1_lines,
+                     #dens = list(fast = e1_dens_fast,
+                    #             slow = e1_dens_slow),
+                     #agg = opt_e1_lines_agg,
                      figs = list(curves = e1_fig_curves %>% ggplotly(., tooltip = "text"),
                                  lines = e1_fig_slopes %>% ggplotly(., tooltip = "text")))
 
@@ -206,11 +207,11 @@ e2_fig_slopes <- ggplot(opt_e2, aes(x = check_at_opt, y = CC_pred, group = ID, c
 
 
 
-full_data$e2 <- list(reg = opt_e2,
-                     lines = opt_e2_lines,
-                     dens = list(fast = e2_dens_fast,
-                                 slow = e2_dens_slow),
-                     agg = opt_e2_lines_agg,
+full_data$e2 <- list(#reg = opt_e2,
+                     #lines = opt_e2_lines,
+                     #dens = list(fast = e2_dens_fast,
+                    #             slow = e2_dens_slow),
+                     #agg = opt_e2_lines_agg,
                      figs = list(curves = e2_fig_curves %>% ggplotly(., tooltip = "text"),
                                  lines = e2_fig_slopes %>% ggplotly(., tooltip = "text")))
 
@@ -302,11 +303,11 @@ e3_fig_slopes <- ggplot(opt_e3_lines, aes(x = check_at_opt, y = CC_pred, group =
   theme_classic()  +
   theme(legend.position = "none")
 
-full_data$e3 <- list(reg = opt_e3,
-                     lines = opt_e3_lines,
-                     dens = list(fast = e3_dens_fast,
-                                 slow = e3_dens_slow),
-                     agg = opt_e3_lines_agg,
+full_data$e3 <- list(#reg = opt_e3,
+                     #lines = opt_e3_lines,
+                     #dens = list(fast = e3_dens_fast,
+                     #            slow = e3_dens_slow),
+                     #agg = opt_e3_lines_agg,
                      figs = list(curves = e3_fig_curves %>% ggplotly(., tooltip = "text"),
                                  lines = e3_fig_slopes %>% ggplotly(., tooltip = "text")))
 
