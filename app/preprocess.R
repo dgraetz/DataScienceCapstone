@@ -84,7 +84,7 @@ e1_fig_curves <- ggplot(opt_e1_lines, aes(x = probabilities, y = rel_reward, gro
   labs(x = "Possible Check Rates", y = "Optimality") +
   theme_classic()  +
   theme(legend.position = "none")
-e1_fig_curves
+
 
 
 
@@ -104,13 +104,15 @@ e1_fig_slopes <- ggplot(opt_e1, aes(x = check_at_opt, y = CC_pred, group = ID, c
   theme(legend.position = "none")
 
 
-full_data$e1 <- list(#reg = opt_e1,
-                     #lines = opt_e1_lines,
-                     #dens = list(fast = e1_dens_fast,
-                    #             slow = e1_dens_slow),
-                     #agg = opt_e1_lines_agg,
-                     figs = list(curves = e1_fig_curves %>% ggplotly(., tooltip = "text"),
-                                 lines = e1_fig_slopes %>% ggplotly(., tooltip = "text")))
+full_data$e1 <- list(
+  curves_data = list(
+    lines     = opt_e1_lines,
+    dens_fast = e1_dens_fast,
+    dens_slow = e1_dens_slow,
+    agg       = opt_e1_lines_agg
+  ),
+  slopes_data = opt_e1
+)
 
 
 # preprocess e2----
@@ -190,7 +192,7 @@ e2_fig_curves <- ggplot(opt_e2_lines, aes(x = probabilities, y = rel_reward, gro
   labs(x = "Possible Check Rates", y = "Optimality") +
   theme_classic() + 
   theme(legend.position = "none")
-e2_fig_curves
+
 
 e2_fig_slopes <- ggplot(opt_e2, aes(x = check_at_opt, y = CC_pred, group = ID, color = ID,
                                     text = paste0(
@@ -207,13 +209,15 @@ e2_fig_slopes <- ggplot(opt_e2, aes(x = check_at_opt, y = CC_pred, group = ID, c
 
 
 
-full_data$e2 <- list(#reg = opt_e2,
-                     #lines = opt_e2_lines,
-                     #dens = list(fast = e2_dens_fast,
-                    #             slow = e2_dens_slow),
-                     #agg = opt_e2_lines_agg,
-                     figs = list(curves = e2_fig_curves %>% ggplotly(., tooltip = "text"),
-                                 lines = e2_fig_slopes %>% ggplotly(., tooltip = "text")))
+full_data$e2 <- list(
+  curves_data = list(
+    lines     = opt_e2_lines,
+    dens_fast = e2_dens_fast,
+    dens_slow = e2_dens_slow,
+    agg       = opt_e2_lines_agg
+  ),
+  slopes_data = opt_e2
+)
 
 
 # preprocess e3----
@@ -288,7 +292,7 @@ e3_fig_curves <- ggplot(opt_e3_lines, aes(x = probabilities, y = rel_reward, gro
   labs(x = "Possible Check Rates", y = "Optimality") +
   theme_classic()  +
   theme(legend.position = "none")
-e3_fig_curves
+
 
 e3_fig_slopes <- ggplot(opt_e3_lines, aes(x = check_at_opt, y = CC_pred, group = ID, color = ID,
                                           text = paste0(
@@ -303,12 +307,14 @@ e3_fig_slopes <- ggplot(opt_e3_lines, aes(x = check_at_opt, y = CC_pred, group =
   theme_classic()  +
   theme(legend.position = "none")
 
-full_data$e3 <- list(#reg = opt_e3,
-                     #lines = opt_e3_lines,
-                     #dens = list(fast = e3_dens_fast,
-                     #            slow = e3_dens_slow),
-                     #agg = opt_e3_lines_agg,
-                     figs = list(curves = e3_fig_curves %>% ggplotly(., tooltip = "text"),
-                                 lines = e3_fig_slopes %>% ggplotly(., tooltip = "text")))
+full_data$e3 <- list(
+  curves_data = list(
+    lines     = opt_e3_lines,
+    dens_fast = e3_dens_fast,
+    dens_slow = e3_dens_slow,
+    agg       = opt_e3_lines_agg
+  ),
+  slopes_data = opt_e3
+)
 
 saveRDS(full_data, "app/empirical_data/full_data.RDS")

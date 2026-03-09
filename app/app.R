@@ -19,14 +19,124 @@ shinyLink <- function(to, label) {
 
 full_data <- readRDS("empirical_data/full_data.RDS")
 
-# shared_e1 <- crosstalk::SharedData$new(full_data$e1$lines, key = ~ID, group = "exp1")
-# shared_e1_reg <- crosstalk::SharedData$new(full_data$e1$reg, key = ~ID, group = "exp1")
-# 
-# shared_e2 <- crosstalk::SharedData$new(full_data$e2$lines, key = ~ID, group = "exp2")
-# shared_e2_reg <- crosstalk::SharedData$new(full_data$e2$reg, key = ~ID, group = "exp2")
-# 
-# shared_e3 <- crosstalk::SharedData$new(full_data$e3$lines, key = ~ID, group = "exp3")
-# shared_e3_reg <- crosstalk::SharedData$new(full_data$e3$reg, key = ~ID, group = "exp3")
+# Build plots once at startup from pre-processed data frames ----
+
+# E1 curves
+e1_d <- full_data$e1$curves_data
+e1_fig_curves_plotly <- (ggplot(e1_d$lines, aes(x = probabilities, y = rel_reward,
+                                                  group = interaction(ID, group), color = Rate,
+                                                  text = paste0(
+                                                    "ID: ", ID, "\n",
+                                                    "RT not checking: ", round(RT_nCC, 2), "\n",
+                                                    "RT checking: ", round(RT_CC, 2), "\n",
+                                                    "Cost: ", round((RT_CC-RT_nCC)/RT_nCC, 2), "\n",
+                                                    "Optimum: ", round(check_at_opt, 2)
+                                                  ))) +
+  geom_line(alpha = 0.5, lwd = 0.2) +
+  geom_ribbon(data = e1_d$dens_slow, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
+  geom_ribbon(data = e1_d$dens_fast, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
+  geom_point(data = e1_d$agg %>% filter(Rate == 0), aes(x = mean_opt, y = 0.1), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
+  geom_point(data = e1_d$agg %>% filter(Rate == 1), aes(x = mean_opt, y = 0.2), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
+  scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8,
+                        labels = c("0" = "fast", "1" = "slow"), name = "Rate:") +
+  scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.8,
+                       labels = c("0" = "fast", "1" = "slow"), name = "Rate:") +
+  geom_text(data = NULL, aes(x = 0.8, y = max(e1_d$dens_slow$ymax, na.rm = TRUE) + 0.01), label = "slow", color = "#FE9F6D") +
+  geom_text(data = NULL, aes(x = 0.7, y = max(e1_d$dens_fast$ymin, na.rm = TRUE) - 0.05), label = "fast", color = "#3B0F70") +
+  coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
+  labs(x = "Possible Check Rates", y = "Optimality") +
+  theme_classic() + theme(legend.position = "none")) %>%
+  ggplotly(tooltip = "text")
+
+# E1 slopes
+e1_fig_slopes_plotly <- (ggplot(full_data$e1$slopes_data,
+                                 aes(x = check_at_opt, y = CC_pred, group = ID, color = ID,
+                                     text = paste0("ID: ", ID, "\n", "slope: ", round(slope, 2)))) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dotted") +
+  geom_line() +
+  scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
+  coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
+  labs(x = "Model Optimal Rate", y = "Observed Rate") +
+  theme_classic() + theme(legend.position = "none")) %>%
+  ggplotly(tooltip = "text")
+
+# E2 curves
+e2_d <- full_data$e2$curves_data
+e2_fig_curves_plotly <- (ggplot(e2_d$lines, aes(x = probabilities, y = rel_reward,
+                                                  group = interaction(ID, group), color = Rate,
+                                                  text = paste0(
+                                                    "ID: ", ID, "\n",
+                                                    "RT not checking: ", round(RT_nCC, 2), "\n",
+                                                    "RT checking: ", round(RT_CC, 2), "\n",
+                                                    "Cost: ", round((RT_CC-RT_nCC)/RT_nCC, 2), "\n",
+                                                    "Optimum: ", round(check_at_opt, 2)
+                                                  ))) +
+  geom_line(alpha = 0.5, lwd = 0.2) +
+  geom_ribbon(data = e2_d$dens_slow, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
+  geom_ribbon(data = e2_d$dens_fast, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
+  geom_point(data = e2_d$agg %>% filter(Rate == 0), aes(x = mean_opt, y = 0.1), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
+  geom_point(data = e2_d$agg %>% filter(Rate == 1), aes(x = mean_opt, y = 0.2), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
+  scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8,
+                        labels = c("0" = "fast", "1" = "slow"), name = "Rate:") +
+  scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.8,
+                       labels = c("0" = "fast", "1" = "slow"), name = "Rate:") +
+  geom_text(data = NULL, aes(x = 0.8, y = max(e2_d$dens_slow$ymax, na.rm = TRUE) + 0.01), label = "slow", color = "#FE9F6D") +
+  geom_text(data = NULL, aes(x = 0.8, y = max(e2_d$dens_fast$ymin, na.rm = TRUE) - 0.05), label = "fast", color = "#3B0F70") +
+  coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
+  labs(x = "Possible Check Rates", y = "Optimality") +
+  theme_classic() + theme(legend.position = "none")) %>%
+  ggplotly(tooltip = "text")
+
+# E2 slopes
+e2_fig_slopes_plotly <- (ggplot(full_data$e2$slopes_data,
+                                 aes(x = check_at_opt, y = CC_pred, group = ID, color = ID,
+                                     text = paste0("ID: ", ID, "\n", "slope: ", round(slope, 2)))) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dotted") +
+  geom_line() +
+  scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
+  coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
+  labs(x = "Model Optimal Rate", y = "Observed Rate") +
+  theme_classic() + theme(legend.position = "none")) %>%
+  ggplotly(tooltip = "text")
+
+# E3 curves
+e3_d <- full_data$e3$curves_data
+e3_fig_curves_plotly <- (ggplot(e3_d$lines, aes(x = probabilities, y = rel_reward,
+                                                  group = interaction(ID, group), color = Rate,
+                                                  text = paste0(
+                                                    "ID: ", ID, "\n",
+                                                    "RT not checking: ", round(RT_nCC, 2), "\n",
+                                                    "RT checking: ", round(RT_CC, 2), "\n",
+                                                    "Cost: ", round((RT_CC-RT_nCC)/RT_nCC, 2), "\n",
+                                                    "Optimum: ", round(check_at_opt, 2)
+                                                  ))) +
+  geom_line(alpha = 0.5, lwd = 0.2) +
+  geom_ribbon(data = e3_d$dens_slow, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
+  geom_ribbon(data = e3_d$dens_fast, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
+  geom_point(data = e3_d$agg %>% filter(Rate == 0), aes(x = mean_opt, y = 0.1), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
+  geom_point(data = e3_d$agg %>% filter(Rate == 1), aes(x = mean_opt, y = 0.2), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
+  scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8,
+                        labels = c("0" = "fast", "1" = "slow"), name = "Rate:") +
+  scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.8,
+                       labels = c("0" = "fast", "1" = "slow"), name = "Rate:") +
+  geom_text(data = NULL, aes(x = 0.7, y = max(e3_d$dens_slow$ymax, na.rm = TRUE) + 0.01), label = "slow", color = "#FE9F6D") +
+  geom_text(data = NULL, aes(x = 0.6, y = max(e3_d$dens_fast$ymin, na.rm = TRUE) - 0.05), label = "fast", color = "#3B0F70") +
+  coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
+  labs(x = "Possible Check Rates", y = "Optimality") +
+  theme_classic() + theme(legend.position = "none")) %>%
+  ggplotly(tooltip = "text")
+
+# E3 slopes
+e3_fig_slopes_plotly <- (ggplot(full_data$e3$slopes_data,
+                                 aes(x = check_at_opt, y = CC_pred, group = ID, color = ID,
+                                     text = paste0("ID: ", ID, "\n", "slope: ", round(slope, 2)))) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dotted") +
+  geom_line() +
+  scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
+  coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
+  labs(x = "Model Optimal Rate", y = "Observed Rate") +
+  theme_classic() + theme(legend.position = "none")) %>%
+  ggplotly(tooltip = "text")
 
 
 
@@ -1812,25 +1922,25 @@ server <- function(input, output, session) {
   ### e1_optimality_curves ----
   output$e1_optimality_curves <- renderPlotly({
     
-    full_data$e1$figs$curves %>% toWebGL()
+    e1_fig_curves_plotly %>% toWebGL()
   })
   
   ### e1_correlation ----
   output$e1_correlation <- renderPlotly({
     
-    full_data$e1$figs$lines %>% toWebGL()
+    e1_fig_slopes_plotly %>% toWebGL()
   })
   
   ### e2_optimality_curves ----
   output$e2_optimality_curves <- renderPlotly({
     
-    full_data$e2$figs$curves %>% toWebGL()
+    e2_fig_curves_plotly %>% toWebGL()
   })
   
   ### e2_correlation ----
   output$e2_correlation <- renderPlotly({
     
-    full_data$e2$figs$lines %>% toWebGL()
+    e2_fig_slopes_plotly %>% toWebGL()
     
   })
   
@@ -1838,7 +1948,7 @@ server <- function(input, output, session) {
   ### e3_optimality_curves ----
   output$e3_optimality_curves <- renderPlotly({
     
-    full_data$e3$figs$curves %>% toWebGL()
+    e3_fig_curves_plotly %>% toWebGL()
   })
   
   
@@ -1846,7 +1956,7 @@ server <- function(input, output, session) {
   ### e3_correlation ----
   output$e3_correlation <- renderPlotly({
     
-    full_data$e3$figs$lines %>% toWebGL()
+    e3_fig_slopes_plotly %>% toWebGL()
   })
   
   
