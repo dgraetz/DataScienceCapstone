@@ -24,118 +24,118 @@ full_data <- readRDS("empirical_data/full_data.RDS")
 # E1 curves
 e1_d <- full_data$e1$curves_data
 e1_fig_curves_plotly <- (ggplot(e1_d$lines, aes(x = probabilities, y = rel_reward,
-                                                  group = interaction(ID, group), color = Rate,
-                                                  text = paste0(
-                                                    "ID: ", ID, "\n",
-                                                    "RT not checking: ", round(RT_nCC, 2), "\n",
-                                                    "RT checking: ", round(RT_CC, 2), "\n",
-                                                    "Cost: ", round((RT_CC-RT_nCC)/RT_nCC, 2), "\n",
-                                                    "Optimum: ", round(check_at_opt, 2)
-                                                  ))) +
-  geom_line(alpha = 0.5, lwd = 0.2) +
-  geom_ribbon(data = e1_d$dens_slow, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
-  geom_ribbon(data = e1_d$dens_fast, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
-  geom_point(data = e1_d$agg %>% filter(Rate == 0), aes(x = mean_opt, y = 0.1), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
-  geom_point(data = e1_d$agg %>% filter(Rate == 1), aes(x = mean_opt, y = 0.2), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
-  scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8,
-                        labels = c("0" = "fast", "1" = "slow"), name = "Rate:") +
-  scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.8,
-                       labels = c("0" = "fast", "1" = "slow"), name = "Rate:") +
-  geom_text(data = NULL, aes(x = 0.8, y = max(e1_d$dens_slow$ymax, na.rm = TRUE) + 0.01), label = "slow", color = "#FE9F6D") +
-  geom_text(data = NULL, aes(x = 0.7, y = max(e1_d$dens_fast$ymin, na.rm = TRUE) - 0.05), label = "fast", color = "#3B0F70") +
-  coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
-  labs(x = "Possible Check Rates", y = "Optimality") +
-  theme_classic() + theme(legend.position = "none")) %>%
+                                                group = interaction(ID, group), color = Rate,
+                                                text = paste0(
+                                                  "ID: ", ID, "\n",
+                                                  "RT not checking: ", round(RT_nCC, 2), "\n",
+                                                  "RT checking: ", round(RT_CC, 2), "\n",
+                                                  "Cost: ", round((RT_CC-RT_nCC)/RT_nCC, 2), "\n",
+                                                  "Optimum: ", round(check_at_opt, 2)
+                                                ))) +
+                           geom_line(alpha = 0.5, lwd = 0.2) +
+                           geom_ribbon(data = e1_d$dens_slow, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
+                           geom_ribbon(data = e1_d$dens_fast, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
+                           geom_point(data = e1_d$agg %>% filter(Rate == 0), aes(x = mean_opt, y = 0.1), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
+                           geom_point(data = e1_d$agg %>% filter(Rate == 1), aes(x = mean_opt, y = 0.2), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
+                           scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8,
+                                                 labels = c("0" = "fast", "1" = "slow"), name = "Rate:") +
+                           scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.8,
+                                                labels = c("0" = "fast", "1" = "slow"), name = "Rate:") +
+                           geom_text(data = NULL, aes(x = 0.8, y = max(e1_d$dens_slow$ymax, na.rm = TRUE) + 0.01), label = "slow", color = "#FE9F6D") +
+                           geom_text(data = NULL, aes(x = 0.7, y = max(e1_d$dens_fast$ymin, na.rm = TRUE) - 0.05), label = "fast", color = "#3B0F70") +
+                           coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
+                           labs(x = "Possible Check Rates", y = "Optimality") +
+                           theme_classic() + theme(legend.position = "none")) %>%
   ggplotly(tooltip = "text")
 
 # E1 slopes
 e1_fig_slopes_plotly <- (ggplot(full_data$e1$slopes_data,
-                                 aes(x = check_at_opt, y = CC_pred, group = ID, color = ID,
-                                     text = paste0("ID: ", ID, "\n", "slope: ", round(slope, 2)))) +
-  geom_abline(intercept = 0, slope = 1, linetype = "dotted") +
-  geom_line() +
-  scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
-  coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
-  labs(x = "Model Optimal Rate", y = "Observed Rate") +
-  theme_classic() + theme(legend.position = "none")) %>%
+                                aes(x = check_at_opt, y = CC_pred, group = ID, color = ID,
+                                    text = paste0("ID: ", ID, "\n", "slope: ", round(slope, 2)))) +
+                           geom_abline(intercept = 0, slope = 1, linetype = "dotted") +
+                           geom_line() +
+                           scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
+                           coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
+                           labs(x = "Model Optimal Rate", y = "Observed Rate") +
+                           theme_classic() + theme(legend.position = "none")) %>%
   ggplotly(tooltip = "text")
 
 # E2 curves
 e2_d <- full_data$e2$curves_data
 e2_fig_curves_plotly <- (ggplot(e2_d$lines, aes(x = probabilities, y = rel_reward,
-                                                  group = interaction(ID, group), color = Rate,
-                                                  text = paste0(
-                                                    "ID: ", ID, "\n",
-                                                    "RT not checking: ", round(RT_nCC, 2), "\n",
-                                                    "RT checking: ", round(RT_CC, 2), "\n",
-                                                    "Cost: ", round((RT_CC-RT_nCC)/RT_nCC, 2), "\n",
-                                                    "Optimum: ", round(check_at_opt, 2)
-                                                  ))) +
-  geom_line(alpha = 0.5, lwd = 0.2) +
-  geom_ribbon(data = e2_d$dens_slow, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
-  geom_ribbon(data = e2_d$dens_fast, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
-  geom_point(data = e2_d$agg %>% filter(Rate == 0), aes(x = mean_opt, y = 0.1), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
-  geom_point(data = e2_d$agg %>% filter(Rate == 1), aes(x = mean_opt, y = 0.2), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
-  scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8,
-                        labels = c("0" = "fast", "1" = "slow"), name = "Rate:") +
-  scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.8,
-                       labels = c("0" = "fast", "1" = "slow"), name = "Rate:") +
-  geom_text(data = NULL, aes(x = 0.8, y = max(e2_d$dens_slow$ymax, na.rm = TRUE) + 0.01), label = "slow", color = "#FE9F6D") +
-  geom_text(data = NULL, aes(x = 0.8, y = max(e2_d$dens_fast$ymin, na.rm = TRUE) - 0.05), label = "fast", color = "#3B0F70") +
-  coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
-  labs(x = "Possible Check Rates", y = "Optimality") +
-  theme_classic() + theme(legend.position = "none")) %>%
+                                                group = interaction(ID, group), color = Rate,
+                                                text = paste0(
+                                                  "ID: ", ID, "\n",
+                                                  "RT not checking: ", round(RT_nCC, 2), "\n",
+                                                  "RT checking: ", round(RT_CC, 2), "\n",
+                                                  "Cost: ", round((RT_CC-RT_nCC)/RT_nCC, 2), "\n",
+                                                  "Optimum: ", round(check_at_opt, 2)
+                                                ))) +
+                           geom_line(alpha = 0.5, lwd = 0.2) +
+                           geom_ribbon(data = e2_d$dens_slow, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
+                           geom_ribbon(data = e2_d$dens_fast, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
+                           geom_point(data = e2_d$agg %>% filter(Rate == 0), aes(x = mean_opt, y = 0.1), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
+                           geom_point(data = e2_d$agg %>% filter(Rate == 1), aes(x = mean_opt, y = 0.2), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
+                           scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8,
+                                                 labels = c("0" = "fast", "1" = "slow"), name = "Rate:") +
+                           scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.8,
+                                                labels = c("0" = "fast", "1" = "slow"), name = "Rate:") +
+                           geom_text(data = NULL, aes(x = 0.8, y = max(e2_d$dens_slow$ymax, na.rm = TRUE) + 0.01), label = "slow", color = "#FE9F6D") +
+                           geom_text(data = NULL, aes(x = 0.8, y = max(e2_d$dens_fast$ymin, na.rm = TRUE) - 0.05), label = "fast", color = "#3B0F70") +
+                           coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
+                           labs(x = "Possible Check Rates", y = "Optimality") +
+                           theme_classic() + theme(legend.position = "none")) %>%
   ggplotly(tooltip = "text")
 
 # E2 slopes
 e2_fig_slopes_plotly <- (ggplot(full_data$e2$slopes_data,
-                                 aes(x = check_at_opt, y = CC_pred, group = ID, color = ID,
-                                     text = paste0("ID: ", ID, "\n", "slope: ", round(slope, 2)))) +
-  geom_abline(intercept = 0, slope = 1, linetype = "dotted") +
-  geom_line() +
-  scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
-  coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
-  labs(x = "Model Optimal Rate", y = "Observed Rate") +
-  theme_classic() + theme(legend.position = "none")) %>%
+                                aes(x = check_at_opt, y = CC_pred, group = ID, color = ID,
+                                    text = paste0("ID: ", ID, "\n", "slope: ", round(slope, 2)))) +
+                           geom_abline(intercept = 0, slope = 1, linetype = "dotted") +
+                           geom_line() +
+                           scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
+                           coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
+                           labs(x = "Model Optimal Rate", y = "Observed Rate") +
+                           theme_classic() + theme(legend.position = "none")) %>%
   ggplotly(tooltip = "text")
 
 # E3 curves
 e3_d <- full_data$e3$curves_data
 e3_fig_curves_plotly <- (ggplot(e3_d$lines, aes(x = probabilities, y = rel_reward,
-                                                  group = interaction(ID, group), color = Rate,
-                                                  text = paste0(
-                                                    "ID: ", ID, "\n",
-                                                    "RT not checking: ", round(RT_nCC, 2), "\n",
-                                                    "RT checking: ", round(RT_CC, 2), "\n",
-                                                    "Cost: ", round((RT_CC-RT_nCC)/RT_nCC, 2), "\n",
-                                                    "Optimum: ", round(check_at_opt, 2)
-                                                  ))) +
-  geom_line(alpha = 0.5, lwd = 0.2) +
-  geom_ribbon(data = e3_d$dens_slow, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
-  geom_ribbon(data = e3_d$dens_fast, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
-  geom_point(data = e3_d$agg %>% filter(Rate == 0), aes(x = mean_opt, y = 0.1), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
-  geom_point(data = e3_d$agg %>% filter(Rate == 1), aes(x = mean_opt, y = 0.2), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
-  scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8,
-                        labels = c("0" = "fast", "1" = "slow"), name = "Rate:") +
-  scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.8,
-                       labels = c("0" = "fast", "1" = "slow"), name = "Rate:") +
-  geom_text(data = NULL, aes(x = 0.7, y = max(e3_d$dens_slow$ymax, na.rm = TRUE) + 0.01), label = "slow", color = "#FE9F6D") +
-  geom_text(data = NULL, aes(x = 0.6, y = max(e3_d$dens_fast$ymin, na.rm = TRUE) - 0.05), label = "fast", color = "#3B0F70") +
-  coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
-  labs(x = "Possible Check Rates", y = "Optimality") +
-  theme_classic() + theme(legend.position = "none")) %>%
+                                                group = interaction(ID, group), color = Rate,
+                                                text = paste0(
+                                                  "ID: ", ID, "\n",
+                                                  "RT not checking: ", round(RT_nCC, 2), "\n",
+                                                  "RT checking: ", round(RT_CC, 2), "\n",
+                                                  "Cost: ", round((RT_CC-RT_nCC)/RT_nCC, 2), "\n",
+                                                  "Optimum: ", round(check_at_opt, 2)
+                                                ))) +
+                           geom_line(alpha = 0.5, lwd = 0.2) +
+                           geom_ribbon(data = e3_d$dens_slow, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
+                           geom_ribbon(data = e3_d$dens_fast, aes(x = x, ymin = ymin, ymax = ymax, fill = Rate), inherit.aes = FALSE) +
+                           geom_point(data = e3_d$agg %>% filter(Rate == 0), aes(x = mean_opt, y = 0.1), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
+                           geom_point(data = e3_d$agg %>% filter(Rate == 1), aes(x = mean_opt, y = 0.2), inherit.aes = FALSE, pch = 23, fill = "white", size = 2) +
+                           scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8,
+                                                 labels = c("0" = "fast", "1" = "slow"), name = "Rate:") +
+                           scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.8,
+                                                labels = c("0" = "fast", "1" = "slow"), name = "Rate:") +
+                           geom_text(data = NULL, aes(x = 0.7, y = max(e3_d$dens_slow$ymax, na.rm = TRUE) + 0.01), label = "slow", color = "#FE9F6D") +
+                           geom_text(data = NULL, aes(x = 0.6, y = max(e3_d$dens_fast$ymin, na.rm = TRUE) - 0.05), label = "fast", color = "#3B0F70") +
+                           coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
+                           labs(x = "Possible Check Rates", y = "Optimality") +
+                           theme_classic() + theme(legend.position = "none")) %>%
   ggplotly(tooltip = "text")
 
 # E3 slopes
 e3_fig_slopes_plotly <- (ggplot(full_data$e3$slopes_data,
-                                 aes(x = check_at_opt, y = CC_pred, group = ID, color = ID,
-                                     text = paste0("ID: ", ID, "\n", "slope: ", round(slope, 2)))) +
-  geom_abline(intercept = 0, slope = 1, linetype = "dotted") +
-  geom_line() +
-  scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
-  coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
-  labs(x = "Model Optimal Rate", y = "Observed Rate") +
-  theme_classic() + theme(legend.position = "none")) %>%
+                                aes(x = check_at_opt, y = CC_pred, group = ID, color = ID,
+                                    text = paste0("ID: ", ID, "\n", "slope: ", round(slope, 2)))) +
+                           geom_abline(intercept = 0, slope = 1, linetype = "dotted") +
+                           geom_line() +
+                           scale_color_viridis_d(option = "magma", begin = 0.2, end = 0.8) +
+                           coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
+                           labs(x = "Model Optimal Rate", y = "Observed Rate") +
+                           theme_classic() + theme(legend.position = "none")) %>%
   ggplotly(tooltip = "text")
 
 
@@ -416,55 +416,127 @@ ui <- page_navbar(
               )
             ),
             
-            markdown("
+            div(markdown("
 
 # Welcome
+
+<br>
+
 ### Decision-Making about our Attention
                      
 We are interested in how our cognitive system controls where to focus attention. The answer to this question depends on the specific context, but our general approach to this question is through the lens of rational decision-making. 
                      
-For this project, **I am highlighting one context** in which humans decide on an attentional checking-for-information policy - and our research has found that they consider the costs and benefits of possible strategies to make an attentional decision.  
-                     
+For this project, **I am highlighting two contexts** in which humans decide on an attentional checking-for-information policy - and our research has found that they consider the costs and benefits of possible strategies to make an attentional decision.  
+
+<br>
+
+")),
+            
+            div(
+              markdown("### Two Contexts of Attentional Decision-Making"),
+              p("Choose a context below to explore its theoretical background:"),
+              
+              navset_underline( 
+                
+                # Tab 1
+                nav_panel(
+                  title = "1. Rule Updating",
+                  icon = icon("signs-post"),
+                  div(class = "bg-body-tertiary p-4 rounded shadow-sm mb-4",
+                      markdown("
+                      
 > EXAMPLE SCENARIO: You're driving a car with the assistance of a GPS. If you use a GPS on a familiar route, it offers little information (~ the environment does not demand frequent updating of information, instead you can naviagte from memory alone). Attending to a GPS will also be rather risky if the encoding of the information takes rather long (~ time cost). This cost may be mitigated if you're moving rather slow and need to make few turns (~ long primary task duration). As another factor, if you're on your way to an important meeting, you might rely on the GPS more (~benefits of correct, costs of incorrect, performance).
 
 <br>
 
 #### Characteristics of the context of interest:
+
 To more generally characterize the context that we present research on: 
 1) The primary task must be ambiguous and might benefit at least to some degree from additional information
 2) Completing a primary task takes time, and obtaining additional information costs additional time
 3) Performing the primary task correctly leads to benefits, performing incorrectly leads to costs
 4) Time for completing the task is limited.
-
+        
 <br>
-
+        
 #### Decision Variables to consider:
 
 * __Payoff for correct responses vs. Losses for incorrect responses:__ High payoffs for correct responses and high losses for incorrect responses will bias optimal behavior to more checking.
 * __Uncertainty__: Higher switch rates, or in other words, greater uncertainty about the rule that leads to correct task performance, will bias optimal behavior to more checking.
 * __Information retrieval time:__ Lower time costs for obtaining additional information will bias optimal behavior to more checking.
 * __Your response speed__: Slower primary task response rates will bias optimal behavior to more checking. This may appear counter-intuitive, but the intuition is that if tasks take longer while the information retrieval time remains constant (lower _relative checking cost_), it is more adaptive to check.
+        ")
+                  )
+                ),
+                
+                # Tab 2
+                nav_panel(
+                  title = "2. State Checking",
+                  icon = icon("satellite-dish"),
+                  div(class = "bg-body-tertiary p-4 rounded shadow-sm mb-4",
+                      markdown("
+> EXAMPLE SCENARIO: You're sitting in a classroom and your main task is to pay attention to the instructor. However, you know that your classmates are talking about something that is relevant to you. You don't need to check their conversation for extended periods of time, but you want to briefly check what they are talking about.  And, they are not always talking about something relevant, so sometimes you will check and it doesn't come at any benefit, sometimes you check and it's useful information, but most importantly, if you miss something, then this can come at smaller or greater consequences or costs ('you're missing out').
+        
+<br>
+        
+#### Characteristics of the context of interest:
 
-These considerations transfer to a wide range of scenarios, that all have in common that decisions must be made between attenting to a primary task and relevant information in the environment (e. g., using notes and books during an open book exam, giving a speech and checking notes, cooking and checking a recipe, making a purchase and comparing prices etc.).
+1) The primary task is completely independent of the state. 
+2) Completing a primary task takes time, and obtaining additional information costs additional time
+3) Performing the primary task correctly leads to benefits, and missing out on additional information (i. e., the active state) represents a cost.
+4) Time for completing the task is limited.
+        
+<br>
+        
+#### Decision Variables to consider:
+
+* __Payoff for correct responses vs. Losses for incorrect responses:__ High payoffs for correct responses and high losses missing an active state will bias optimal behavior to more checking.
+* __Information retrieval time:__ Lower time costs for obtaining information about the state will bias optimal behavior to more checking.
+* __Your response speed__: Slower primary task response rates will bias optimal behavior to more state checking. This may appear counter-intuitive, but the intuition is that if tasks take longer while the information retrieval time remains constant (lower _relative checking cost_), it is more adaptive to check.
+        ")
+                  )
+                )
+              )
+            ),
+            div(markdown(
+              
+              "
+                     
 
 <br>
 
 #### Computational Model and Simulations
 
-We have developed a __computational model__ and __Monte-Carlo simulation__ that allows us to calculate the payoff for different attentional strategies. From a rational decision-making perspective, humans should select an attentional strategy that aligns with the maxmimum payoff. However, as you can see under the Computation/Simulation Lab, many contexts yield an optimality curve that is fairly broad, i. e., a function where a realtively wide range of checking strategies come relatively close to the optimum. 
+We have developed a __computational model__ and __Monte-Carlo simulation__ that allows us to calculate the payoff for different attentional strategies. From a rational decision-making perspective, humans should select an attentional strategy that aligns with the maxmimum payoff. However, as you can see in the Computation/Simulation Tool, many contexts yield an optimality curve that is fairly broad, i. e., a function where a realtively wide range of checking strategies come relatively close to the optimum. 
 
 <br>
 
 ### This website
 
-The goal of this website is to showcase my work. 
-* Under the __Computation/Simulation Lab__ section, you can explore how manipulating the different parameters affect the attentional decision-making landscape. 
-* In the __Empirical Findings__ tab, you can read about the experiments we have conducted and to which degree empirical checking rates collected from human subjects line up with the predicitons from this computational model.
-* Read more about the team in the __People__ tab. 
-
+The goal of this website is to help readers of the paper explore how different settings of the value context change the decision landscape."),
+              
+              tags$ul(
+                tags$li(
+                  "Under the ", 
+                  shinyLink(to = "comp_sim", label = "Computation/Simulation Lab"), 
+                  " section, you can explore how parameters affect behavior."
+                ),
+                tags$li(
+                  "In the ", 
+                  shinyLink(to = "empirical", label = "Empirical Findings"), 
+                  " tab, you can read about the experiments we conducted."
+                ),
+                tags$li(
+                  "Read more about the team in the ", 
+                  shinyLink(to = "people", label = "People"), 
+                  " tab."
+                )
+              ),
+              
+              markdown("
 You can read more about our work on our [lab website](https://blogs.uoregon.edu/cognitivedynamics/home/), and the pre-registrations for [experiment 1](https://osf.io/ayvp9), [experiment 2](https://osf.io/dar78), and [experiment 3](https://osf.io/tvjw7) on OSF. You can find posters that I presented on this work under my [ResearchGate](https://www.researchgate.net/profile/Dominik-Graetz) profile.
 "
-            ),
+              )),
             
             layout_columns(
               col_widths = c(9, 3), # Smaller column for photo, larger for text
@@ -489,13 +561,14 @@ You can read more about our work on our [lab website](https://blogs.uoregon.edu/
   
   ## Computation/Simulation Tool ----
   nav_panel(
-    title = "Computation/Simulation Tool",
+    title = "Computation/Simulation Tool", 
+    value = "comp_sim",
     icon = icon("microchip"),
     
     ### Scenario 1 ----
     
     navset_underline(
-      nav_panel("Task-Switching Scenario",
+      nav_panel("Rule Updating",
                 icon = icon("signs-post"),
                 hr(),
                 div(
@@ -719,7 +792,7 @@ You can read more about our work on our [lab website](https://blogs.uoregon.edu/
       ),
       
       ### Sidetask ----
-      nav_panel(title = "Task + State checking",
+      nav_panel(title = "State checking",
                 icon = icon("satellite-dish"),
                 
                 hr(),
@@ -735,6 +808,28 @@ You can read more about our work on our [lab website](https://blogs.uoregon.edu/
                   tags$button(
                     type = "button", 
                     class = "btn-close ms-auto", 
+                    `data-bs-dismiss` = "alert", 
+                    `aria-label` = "Close"
+                  )
+                ),
+                div(
+                  # Changed to alert-warning for that 'Pilot/Under Development' look
+                  class = "alert alert-warning border-0 shadow-sm d-flex align-items-center",
+                  style = "margin-bottom: 20px;",
+                  
+                  # Changed icon to a warning triangle
+                  icon("triangle-exclamation", class = "me-3", style = "font-size: 1.5rem;"),
+                  
+                  div(
+                    h5("Pilot Mode: Model Under Development", class = "alert-heading mb-1 fw-bold"),
+                    p("Please note that this specific computational model is currently in a pilot phase. While functional, the underlying parameters and simulation logic are still being refined. Use these preliminary results for exploration purposes only. You can check on the newest developments of the more comprehensive models", a("here.", href = "https://github.com/dgraetz/state_checking_attentional_allocation_model", target = "_blank"), 
+                      class = "mb-0 small")
+                  ),
+                  
+                  # The Close Button
+                  tags$button(
+                    type = "button", 
+                    class = "btn-close ms-auto align-self-start", 
                     `data-bs-dismiss` = "alert", 
                     `aria-label` = "Close"
                   )
@@ -900,25 +995,28 @@ You can read more about our work on our [lab website](https://blogs.uoregon.edu/
                         tags$div(
                           
                           markdown(
-                            "This page is designed to compare a Monte-Carlo simulation with our computational model. The key idea of this model model is that the relative payoff for different run lengths of trials (e. g., run length of 1 means checking in every trial or 100 %, 2 would be 50 %, 3 would be 33 % and so forth is compared. 
+                            "This page is designed to compare a Monte-Carlo simulation with our computational model. The key idea of this model model is that the relative payoff for different run lengths of trials (e. g., run length of 1 means checking in every trial or 100 %, 2 would be 50 %, 3 would be 33 % and so forth) is compared. 
                             
                             ### Simulation
                             
-                            The simulation that can be generated here plots generates task sequences and the simulates an agent performing with a stochastic check rate, and assigns corresponding _RTs_ to simulated trials with and without cue checks, assigns gains and losses for simulated correct and incorrect trials, and then summarizes the iteration in the payoff.
+                            The simulation that can be generated here plots generates task sequences and then simulates an agent performing with a stochastic check rate, and assigns corresponding _RTs_ to simulated trials with and without cue checks, assigns gains and losses for simulated correct and incorrect trials, and then summarizes the iteration in the payoff.
                             
                             
                             ### Computational Model
                             
-                            The model calculates the payoff for all attentional strategies such that one can visualize the optimality curve. It takes into account the probability of a task switch, _p_, the gains _g_ per correct trial and losses _l_ for incorrect trials. To compute the relative time cost, individual _RTs_ for trials with and without cue checks are needed. To interpolate over the entire block duration, the duration of the inter-trial-interval and the total block duration are needed."
+                            The model calculates the payoff for all attentional strategies such that one can visualize the optimality curve. It takes into account the probability of a state change, _p_, the gains _g_ per correct trial and losses _l_ for incorrect trials. To compute the relative time cost, individual _RTs_ for trials with and without cue checks are needed. To interpolate over the entire block duration, the duration of the inter-trial-interval and the total block duration are needed. Calculating the probability of a state change is here based on the steady state of a Markov Chain with known probbilities (here, P(Go On) and P (Go Off)). In reality the probability of a given state and accurate reward calculations depend on the frequency of checking and the trial number of a block, but for simplicity, I am here using the steady state. I am currently working on a more accurate model that more accurately calculates reward based on these additional factors."
                           ),
                           
                           # 1. Probability of task staying the same
                           p("First, we calculate the probability that the task remains the same at trial \\(n\\):"),
-                          p("$$p_{same}(n) = \\frac{1}{2} [1 + (1 - 2p)^n]$$"),
+                          p("$$p_{\\text{steady state - off}} = \\frac{p_{\\text{go off}}}{p_{\\text{go off}} + p_{\\text{go on}}}$$"),
+                          p("Therefore, $$p_{\\text{steady state - on}} = 1 - p_{\\text{steady state - off}}$$"),
+                          p("Because the states are instantaneous, a Loss will happen with the probability that a state is on and turns off in the next trial:"),
+                          p("$$p_{\\text{Loss}} = p_{\\text{steady state - on}} * p_{\\text{go off}$$"),
                           
                           # 2. Payoff on Non-Check (PONC)
                           p("The expected payoff for a single trial \\(n\\) without checking:"),
-                          p("$$PONC_n = p_{same}(n) g + (1 - p_{same}(n)) l$$"),
+                          p("$$PONC_n = r * g +  r * p_{\text{Loss}} * l$$"),
                           p("Where \\(g\\) is gain and \\(l\\) is loss."),
                           br(),
                           
@@ -928,7 +1026,7 @@ You can read more about our work on our [lab website](https://blogs.uoregon.edu/
                           
                           # 4. Average Payoff on Check (APOC)
                           p("If a check occurs on the last trial (guaranteeing a win), the average payoff is:"),
-                          p("$$APOC_r = \\frac{1}{r} (\\sum_{n=1}^{r-1} PONC_n + g)$$"),
+                          p("$$APOC_r = \\frac{1}{r} (\\sum_{n=1}^{r-1} PONC_n + g + (p_{\text{Loss}} * l))$$"),
                           
                           # 5. Cost Coefficient (CC)
                           p("We calculate a time-cost multiplier based on RT, ITI, and check duration:"),
@@ -959,9 +1057,10 @@ You can read more about our work on our [lab website](https://blogs.uoregon.edu/
   
   ## Empirical Findings ----
   
-  nav_panel("Empirical Findings",
+  nav_panel("Empirical Findings", 
+            value = "empirical",
             icon = icon("chart-line"),
-            navset_pill(
+            navset_underline(
               
               
               ### E1 ----
@@ -970,7 +1069,6 @@ You can read more about our work on our [lab website](https://blogs.uoregon.edu/
                           col_widths = c(6, 5),
                           card(
                             card_header("Project Overview"),
-                            shinyLink("welcome", label = "Link To Welcome Page"),
                             markdown("
 
 
@@ -1125,7 +1223,8 @@ We recruited 44 subjects (41 subjects were included in the final sample) from th
   
   ## people page ----
   
-  nav_panel("People",
+  nav_panel("People", 
+            value = "people",
             icon = icon("user-group"),
             
             tags$h3("People", 
@@ -1247,6 +1346,18 @@ server <- function(input, output, session) {
   
   observeEvent(input$link_to_welcome, {
     updateNavbarPage(session, "main_nav", selected = "welcome")
+  })
+  
+  observeEvent(input$link_to_people, {
+    updateNavbarPage(session, "main_nav", selected = "people")
+  })
+  
+  observeEvent(input$link_to_compsim, {
+    updateNavbarPage(session, "main_nav", selected = "compsim")
+  })
+  
+  observeEvent(input$link_to_empirical, {
+    updateNavbarPage(session, "main_nav", selected = "empirical")
   })
   
   ## standardtask ----

@@ -268,21 +268,16 @@ comp_sidetask <- function(RT_A_only,
     
     cr_i <- results$cr[i]
     
-    # 1. State Probabilities (Steady State Markov)
+    # (Steady State Markov)
     # Pi_off: Proportion of time world is in "OFF" state
     # Pi_on:  Proportion of time world is in "ON" state
     Pi_off <- p_go_off / (p_go_on + p_go_off)
     Pi_on  <- 1 - Pi_off
     
-    # 2. Event Statistics
-    # Lambda: Probability of a new event STARTING on any given trial
-    lambda_event <- Pi_off * p_go_on
+    # p_event: Probabfility of a new event STARTING on any given trial
+    p_event <- Pi_off * p_go_on
     
-    # 3. Probability of Missing an Event
-    # A miss occurs if we fail to check (1-cr) for every trial the monster is alive.
-    # The duration of the monster follows a Geometric distribution (p = p_go_off).
-    # P(Miss) = Sum[ P(Length=k) * (1-cr)^k ] for k=1 to infinity.
-    # This resolves to a geometric series:
+    # A miss occurs if we fail to check (1-cr) for every trial the monster is alive, we're using a geometric interpolation heree
     q <- 1 - cr_i
     P_miss_event <- (p_go_off * q) / (1 - (1 - p_go_off) * q)
     
@@ -291,14 +286,12 @@ comp_sidetask <- function(RT_A_only,
     
     P_catch_event <- 1 - P_miss_event
     
-    # 4. Expected Reward Per Trial
     # Base Reward (A) + (Prob of Catch * Bonus) - (Prob of Miss * Penalty)
     # Note: Win_A happens every trial. Bonus/Penalty happen once per event.
     E_Reward_Trial <- Win_A + 
-      (lambda_event * P_catch_event * Win_B) - 
-      (lambda_event * P_miss_event * Loss_B)
+      (p_event * P_catch_event * Win_B) - 
+      (p_event * P_miss_event * Loss_B)
     
-    # 5. Expected Time Per Trial
     # We calculate the weighted average of time spent.
     # T_base:  Time when NOT checking
     # T_check: Time when Checking (standard check cost)
@@ -308,14 +301,14 @@ comp_sidetask <- function(RT_A_only,
     T_base  <- (1 - cr_i) * (RT_A_only + ITI)
     T_check <- cr_i * (RT_A_B_check + ITI)
     
-    # Correction: If we catch a monster, one of those checks was actually a response.
+    #If we *do* catch a monster, one of those checks was actually a response.
     # We add the difference between Response Time and Check Time.
-    T_response_adjustment <- lambda_event * P_catch_event * (RT_A_B_response - RT_A_B_check)
+    T_response_adjustment <- p_event * P_catch_event * (RT_A_B_response - RT_A_B_check)
     
     E_Time_Trial <- T_base + T_check + T_response_adjustment
     
-    # 6. Total Calculation
-    # How many trials fit in the total Time?
+
+    # How many trials fit in the total Time,. then apply proportinal expected rewards
     Expected_Trials <- Time / E_Time_Trial
     Total_Reward <- Expected_Trials * E_Reward_Trial
     
