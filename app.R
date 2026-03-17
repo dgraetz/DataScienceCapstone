@@ -1,7 +1,7 @@
 library(bslib) 
 library(shiny)
 library(tidyverse)
-library(plotly)
+library(plotly) 
 library(DT)
 library(viridis) 
 library(shinycssloaders) 
