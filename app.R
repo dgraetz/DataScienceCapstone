@@ -3,7 +3,7 @@ library(shiny)
 library(tidyverse)
 library(plotly)
 library(DT)
-library(viridis)
+library(viridis) 
 library(shinycssloaders) 
 
 source("vectorized_simulation_v2.R")
