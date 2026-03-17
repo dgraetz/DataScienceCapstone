@@ -5,7 +5,6 @@ library(plotly)
 library(DT)
 library(viridis)
 library(shinycssloaders) 
-library(lmerTest)
 
 source("vectorized_simulation_v2.R")
 
