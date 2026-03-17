@@ -13,7 +13,10 @@ jobs:
         with:
           fetch-depth: 0
           lfs: true
+          
       - name: Push to hub
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: git push --force https://dgraetz:$HF_TOKEN@huggingface.co/spaces/dgraetz/AttDecMaking main
+        run: |
+          git config lfs.allowincompletepush true
+          git push --force https://dgraetz:$HF_TOKEN@huggingface.co/spaces/dgraetz/AttDecMaking main
