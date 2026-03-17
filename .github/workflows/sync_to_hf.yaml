@@ -16,5 +16,4 @@ jobs:
       - name: Push to hub
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        # REPLACE 'YOUR_USERNAME' and 'YOUR_SPACE_NAME' BELOW!
-        run: git push --force https://YOUR_USERNAME:$HF_TOKEN@huggingface.co/spaces/YOUR_USERNAME/YOUR_SPACE_NAME main
+        run: git push --force https://dgraetz:$HF_TOKEN@huggingface.co/spaces/dgraetz/AttDecMaking main
