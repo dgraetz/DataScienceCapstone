@@ -14,4 +14,4 @@ COPY . /app/
 EXPOSE 7860
 
 # Command to run the Shiny app on the correct port and host
-CMD ["R", "-e", "shiny::runApp('/app', host = '0.0.0.0', port = 7860)"]
+CMD ["R", "-e", "shiny::runApp('', host = '0.0.0.0', port = 7860)"]
