@@ -835,7 +835,7 @@ You can read more about our work on our [lab website](https://blogs.uoregon.edu/
                 ),
                 
                 conditionalPanel(
-                  condition = "input.recalc == 0",
+                  condition = "input.recalc_sidetask == 0",
                   div(
                     class = "alert alert-info",
                     style = "margin-top: 20px; border-left: 5px solid #2c3e50;",
@@ -1351,8 +1351,8 @@ server <- function(input, output, session) {
     updateNavbarPage(session, "main_nav", selected = "people")
   })
   
-  observeEvent(input$link_to_compsim, {
-    updateNavbarPage(session, "main_nav", selected = "compsim")
+  observeEvent(input$link_to_comp_sim, {
+    updateNavbarPage(session, "main_nav", selected = "comp_sim")
   })
   
   observeEvent(input$link_to_empirical, {
@@ -1433,7 +1433,8 @@ server <- function(input, output, session) {
                       )))+
         geom_point(data = computation_results %>% filter(is_max == 1), aes(x = probabilities, y = rel_reward, group = cond, color = color), size = 3, shape = 23)+
         labs(x = "Check Rate",
-             y = "Relative reward")
+             y = "Relative reward")+
+        coord_cartesian(xlim = c(0, 1), ylim = c(0, 1))
       
     } else {
       
@@ -1445,13 +1446,13 @@ server <- function(input, output, session) {
                       )))+
         geom_point(data = computation_results %>% filter(is_max == 1), aes(x = probabilities, y = earnings, group = cond, color = color), size = 3, shape = 23)+
         labs(x = "Check Rate",
-             y = "Absolute reward")
+             y = "Absolute reward")+
+        coord_cartesian(xlim = c(0, 1))
       
     }
     
     plt <- plt +
       scale_color_identity()+
-      coord_cartesian(xlim = c(0, 1), ylim = c(0, 1))+
       theme_classic()+
       theme(legend.position = "none")
     
@@ -1727,6 +1728,7 @@ server <- function(input, output, session) {
     
     max_parameters <- lapply(params_sidetask, length) %>% unlist() %>% max()
     
+    
     data.frame(baseline = rep(params_sidetask$baseline, length.out = max_parameters),
                checkrt  = rep(params_sidetask$checkrt, length.out = max_parameters),
                p_go_on  = rep(params_sidetask$p_go_on, length.out = max_parameters),
@@ -1737,29 +1739,29 @@ server <- function(input, output, session) {
                iti      = rep(params_sidetask$iti, length.out = max_parameters),
                ttime    = rep(params_sidetask$ttime, length.out = max_parameters)
     ) %>%
-      mutate(cond = 1:n()) %>%
-      mutate(color = viridis::magma(n(), begin = 0.2, end = 0.8)) %>%
+      mutate(cond = 1:n(),
+             N_Trials = ttime/(min(c(baseline, checkrt))),
+             color = viridis::magma(n(), begin = 0.2, end = 0.8)) %>%
       rowwise() %>%
-      mutate(
-        predictions = list(
-          comp_sidetask(RT_A_only = baseline,
-                        RT_A_B_check = checkrt,
-                        RT_A_B_response = checkrt,
-                        ITI = iti, 
-                        Win_A = win_a,
-                        Win_B = win_b,
-                        Loss_B = loss_b,
-                        p_go_on = p_go_on,
-                        p_go_off = p_go_off,
-                        Time = ttime,
-                        cr = seq(0, 1, by = 0.01))
-        )
-      ) %>%
+      mutate(trials = list(get_states_crgrid(N_Trials = N_Trials, 
+                                             cr_grid = data.frame(cr_a = seq(0, 1, 0.01),
+                                                                  cr_b = seq(0, 1, 0.01)),
+                                             p_B2A = p_go_on,
+                                             p_A2B = p_go_off))) %>%
+      mutate(predictions = list(get_payout(trials, 
+                                           RT_c = checkrt, 
+                                           RT_nc = baseline, 
+                                           ITI = iti, 
+                                           Win = win_a, 
+                                           Loss = loss_b, 
+                                           TTime = ttime))) %>% 
       ungroup() %>%
       unnest(predictions) %>%
       group_by(cond) %>%
-      mutate(is_max = ifelse(rel_reward == 1, 1, 0)) %>%
+      mutate(rel_reward = Rew_corrected/max(Rew_corrected),
+             is_max = ifelse(rel_reward == 1, 1, 0)) %>%
       ungroup()
+      
     
   })
   
@@ -1773,32 +1775,33 @@ server <- function(input, output, session) {
     if (input$absolute_or_relative_sidetask == "relative"){
       
       plt <- plt +
-        geom_line(aes(x = cr, y = rel_reward, group = cond, color = color, 
+        geom_line(aes(x = cr_a, y = rel_reward, group = cond, color = color, 
                       text = paste0(
-                        "Check Rate: ", round(cr, 2), "\n",
+                        "Check Rate: ", round(cr_a, 2), "\n",
                         "Reward: ", round(rel_reward, 2)
                       )))+
-        geom_point(data = computation_results_sidetask %>% filter(is_max == 1), aes(x = cr, y = rel_reward, group = cond, color = color), size = 3, shape = 23)+
+        geom_point(data = computation_results_sidetask %>% filter(is_max == 1), aes(x = cr_a, y = rel_reward, group = cond, color = color), size = 3, shape = 23)+
         labs(x = "Check Rate",
-             y = "Relative reward")
+             y = "Relative reward")+
+        coord_cartesian(xlim = c(0, 1), ylim = c(0, 1))
       
     } else {
       
       plt <- plt +
-        geom_line(aes(x = cr, y = final_reward, group = cond, color = color,
+        geom_line(aes(x = cr_a, y = Rew_corrected, group = cond, color = color,
                       text = paste0(
-                        "Check Rate: ", round(cr, 2), "\n",
-                        "Reward: ", round(final_reward, 2)
+                        "Check Rate: ", round(cr_a, 2), "\n",
+                        "Reward: ", round(Rew_corrected, 2)
                       )))+
-        geom_point(data = computation_results_sidetask %>% filter(is_max == 1), aes(x = cr, y = final_reward, group = cond, color = color), size = 3, shape = 23)+
+        geom_point(data = computation_results_sidetask %>% filter(is_max == 1), aes(x = cr_a, y = Rew_corrected, group = cond, color = color), size = 3, shape = 23)+
         labs(x = "Check Rate",
-             y = "Absolute reward")
+             y = "Absolute reward")+
+        coord_cartesian(xlim = c(0, 1))
       
     }
     
     plt <- plt +
       scale_color_identity()+
-      coord_cartesian(xlim = c(0, 1), ylim = c(0, 1))+
       theme_classic()+
       theme(legend.position = "none")
     
@@ -1906,15 +1909,15 @@ server <- function(input, output, session) {
       mutate(probabilities = round(probabilities, 2))
     
     c <- c %>%
-      select(cond, color, cr, final_reward, rel_reward) %>%
-      rename(probabilities = cr,
-             com_abs_reward = final_reward,
+      select(cond, color, cr_a, Rew_corrected, rel_reward) %>%
+      rename(probabilities = cr_a,
+             com_abs_reward = Rew_corrected,
              com_rel_reward = rel_reward) %>%
       mutate(probabilities = round(probabilities, 2))
     
     s_c <- left_join(s, c)
     
-    if (input$absolute_or_relative == "relative"){
+    if (input$absolute_or_relative_sidetask == "relative"){
       plt <- ggplot(s_c, aes(com_rel_reward, sim_rel_reward, color = color))+
         labs(x = "computed: relative reward",
              y = "simulated: relative reward")
@@ -1943,16 +1946,18 @@ server <- function(input, output, session) {
   ### cond_table_sidetask ----
   cond_table_sidetask <- reactive({
     
+    d <- computation_results_sidetask()
     
-    df_display <- computation_results_sidetask() %>%
+    df_display <- d %>%
       group_by(cond) %>%
       filter(rel_reward == 1) %>%
       ungroup() %>%
-      select(-rel_reward, -cond, -is_max, -max_reward) %>%
-      mutate(final_reward = round(final_reward, 2),
-             cr = round(cr, 2),
+      select(-rel_reward, -cond, -is_max, -trials, -N_Trials, -cr_b) %>%
+      mutate(final_reward = round(Rew_corrected, 2),
+             cr = round(cr_a, 2),
              check_cost = (
                (checkrt - baseline)/baseline) %>% round(2)) %>%
+      select(-Rew_corrected, -is_max_same, -cr_a) %>%
       relocate(color, cr, final_reward, baseline, checkrt, check_cost, p_go_on, p_go_off, win_a, win_b, loss_b, iti, ttime) %>%
       rename("Win A" = win_a,
              "Win B" = win_b,

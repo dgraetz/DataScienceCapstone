@@ -1,8 +1,8 @@
 library(tidyverse)
 library(plotly)
-opt_e1 <- readRDS("app/empirical_data/e1_optimality.RDS")
-opt_e2 <- readRDS("app/empirical_data/e2_optimality.RDS")
-opt_e3 <- readRDS("app/empirical_data/e3_optimality.RDS")
+opt_e1 <- readRDS("empirical_data/e1_optimality.RDS")
+opt_e2 <- readRDS("empirical_data/e2_optimality.RDS")
+opt_e3 <- readRDS("empirical_data/e3_optimality.RDS")
 
 
 full_data <- list()
@@ -317,4 +317,4 @@ full_data$e3 <- list(
   slopes_data = opt_e3
 )
 
-saveRDS(full_data, "app/empirical_data/full_data.RDS")
+saveRDS(full_data, "empirical_data/full_data.RDS")
