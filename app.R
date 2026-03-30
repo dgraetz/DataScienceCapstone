@@ -607,7 +607,7 @@ You can read more about our work on our [lab website](https://blogs.uoregon.edu/
                   sidebar = sidebar(
                     width = 350,
                     title = "Model Parameters",
-                    helpText("Enter comma-separated values for parameter sets, or, for a series of numbers, numbers in the format from:increment:to (e. g., 2:0.2:3 is interpreted as 2, 2.02, 2.04, 2.06, 2.08, 2.1)"),
+                    helpText("Enter comma-separated values for parameter sets, or, for a series of numbers, numbers in the format from:increment:to (e. g., 2:0.2:2.1 is interpreted as 2, 2.02, 2.04, 2.06, 2.08, 2.1)"),
                     
                     accordion(
                       accordion_panel(
@@ -853,7 +853,7 @@ You can read more about our work on our [lab website](https://blogs.uoregon.edu/
                   sidebar = sidebar(
                     width = 350,
                     title = "Model Parameters",
-                    helpText("Enter comma-separated values for parameter sets, or, for a series of numbers, numbers in the format from:increment:to (e. g., 2:0.2:3 is interpreted as 2, 2.02, 2.04, 2.06, 2.08, 2.1)."),
+                    helpText("Enter comma-separated values for parameter sets, or, for a series of numbers, numbers in the format from:increment:to (e. g., 2:0.2:2.1 is interpreted as 2, 2.02, 2.04, 2.06, 2.08, 2.1)."),
                     
                     accordion(
                       accordion_panel(
