@@ -444,7 +444,7 @@ For this project, **I am highlighting two contexts** in which humans decide on a
                   div(class = "bg-body-tertiary p-4 rounded shadow-sm mb-4",
                       markdown("
                       
-> EXAMPLE SCENARIO: You're driving a car with the assistance of a GPS. If you use a GPS on a familiar route, it offers little information (~ the environment does not demand frequent updating of information, instead you can naviagte from memory alone). Attending to a GPS will also be rather risky if the encoding of the information takes rather long (~ time cost). This cost may be mitigated if you're moving rather slow and need to make few turns (~ long primary task duration). As another factor, if you're on your way to an important meeting, you might rely on the GPS more (~benefits of correct, costs of incorrect, performance).
+> EXAMPLE SCENARIO: You're driving a car with the assistance of a GPS. If you use a GPS on a familiar route, it offers little information (~ the environment does not demand frequent updating of information, instead you can navigate from memory alone). Attending to a GPS will also be rather risky if the encoding of the information takes rather long (~ time cost). This cost may be mitigated if you're moving rather slow and need to make few turns (~ long primary task duration). As another factor, if you're on your way to an important meeting, you might rely on the GPS more (~benefits of correct, costs of incorrect, performance).
 
 <br>
 
@@ -1182,7 +1182,7 @@ In Experiment 3, we manipulated two variables:
 * Task completion rate (inter-trial-interval was short (0.1 s) vs. long (1.6 s))
   - Rate was manipulated by varying the inter-trial interval duration. Longer ITIs affect lower the costs because per unit of time, fewer trials can be completed, reducing the opportunity cost experienced during cue checks.
 * Placeholders (cues were present on the screen, or absent)
-  - Given the consisten placeholder salience effect in Experiments 1 and 2 on both, the optimal check rate and the outcome, we decided to manipulate salience on three levels. Here, as a new level we introduced a sudden onset placeholder that flickered at the beginning of the trial. Given the results of prior experiments, we were interested in whether this additional level is associated ieht more checking and a reduced relative cost. Finding increased check rates and lower relative costs could have implications on how salience-related increases of 'capture' are interpreted.
+  - Given the consisten placeholder salience effect in Experiments 1 and 2 on both, the optimal check rate and the outcome, we decided to manipulate salience on three levels. Here, as a new level we introduced a sudden onset placeholder that flickered at the beginning of the trial. Given the results of prior experiments, we were interested in whether this additional level is associated with more checking and a reduced relative cost. Finding increased check rates and lower relative costs could have implications on how salience-related increases of 'capture' are interpreted.
 
 Participants had 120 seconds to complete a block of trials. 
 
@@ -1199,7 +1199,7 @@ The lower figure plots the empirically measured check rates (y axis) against the
 
 Again, as perdicted, participants checked task cues more frequently when a) the task completion rate was slow, and as placeholder salience increased. 
 
-As placeholder salience increaed, we again replicated the effect of salience from absent to present task cues on both, reduced relative costs and increased checking rates. However, while sudden onsets resulted in more checking of task cues, it was not accompanied by a further reduction in relative checking costs. 
+As placeholder salience increased, we again replicated the effect of salience from absent to present task cues on both, reduced relative costs and increased checking rates. However, while sudden onsets resulted in more checking of task cues, it was not accompanied by a further reduction in relative checking costs. 
 
 # Participants
 
