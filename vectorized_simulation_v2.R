@@ -334,7 +334,7 @@ EarningsWhenChecking <- function(
     TTime = 60, ITI = .2, k_max = 1000
 ) {
   
-  Loss <- abs(Loss)
+  Loss <- -abs(Loss)
   stopifnot(is.finite(BaselineRT), BaselineRT > 0,
             is.finite(CheckRT),    CheckRT >= 0,
             is.finite(Delay),      Delay >= 0,
