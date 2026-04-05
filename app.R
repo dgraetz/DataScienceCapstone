@@ -1522,7 +1522,8 @@ server <- function(input, output, session) {
                       )))+
         geom_point(data = simulation_results %>% filter(is_max == 1), aes(x = CheckP, y = rel_reward, group = cond, color = color), size = 3, shape = 23)+
         labs(x = "Check Rate",
-             y = "Relative reward")
+             y = "Relative reward")+
+        coord_cartesian(xlim = c(0, 1), ylim = c(0, 1))
       
     } else {
       
@@ -1532,15 +1533,15 @@ server <- function(input, output, session) {
                         "Check Rate: ", round(CheckP, 2), "\n",
                         "Reward: ", round(final_reward, 2)
                       )))+
-        geom_point(data = simulation_results %>% filter(is_max == 1), aes(x = CheckP, y = rel_reward, group = cond, color = color), size = 3, shape = 23)+
+        geom_point(data = simulation_results %>% filter(is_max == 1), aes(x = CheckP, y = final_reward, group = cond, color = color), size = 3, shape = 23)+
         labs(x = "Check Rate",
-             y = "Absolute reward")
+             y = "Absolute reward")+
+        coord_cartesian(xlim = c(0, 1))
       
     }
     
     plt <- plt +
       scale_color_identity()+
-      coord_cartesian(xlim = c(0, 1), ylim = c(0, 1))+
       theme_classic()+
       theme(legend.position = "none")
     
@@ -1870,7 +1871,8 @@ server <- function(input, output, session) {
                       )))+
         geom_point(data = simulation_results_sidetask %>% filter(is_max == 1), aes(x = cr, y = rel_reward, group = cond, color = color), size = 3, shape = 23)+
         labs(x = "Check Rate",
-             y = "Relative reward")
+             y = "Relative reward")+
+        coord_cartesian(xlim = c(0, 1), ylim = c(0, 1))
       
     } else {
       
@@ -1882,13 +1884,13 @@ server <- function(input, output, session) {
                       )))+
         geom_point(data = simulation_results_sidetask %>% filter(is_max == 1), aes(x = cr, y = final_reward, group = cond, color = color), size = 3, shape = 23)+
         labs(x = "Check Rate",
-             y = "Absolute reward")
+             y = "Absolute reward")+
+        coord_cartesian(xlim = c(0, 1))
       
     }
     
     plt <- plt +
       scale_color_identity()+
-      coord_cartesian(xlim = c(0, 1), ylim = c(0, 1))+
       theme_classic()+
       theme(legend.position = "none")
     
