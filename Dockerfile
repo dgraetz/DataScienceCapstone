@@ -2,7 +2,7 @@
 FROM rocker/shiny-verse:latest
 
 # Install the specific packages your app needs
-RUN R -e "install.packages(c('bslib', 'plotly', 'DT', 'viridis', 'shinycssloaders', 'lmerTest', 'zoo'), repos='http://cran.rstudio.com/')"
+RUN R -e "install.packages(c('bslib', 'plotly', 'DT', 'viridis', 'shinycssloaders', 'lmerTest', 'zoo', 'expm'), repos='http://cran.rstudio.com/')"
 
 # Set the working directory inside the container
 WORKDIR /app

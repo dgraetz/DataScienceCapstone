@@ -1,6 +1,7 @@
 #v2: controlling for guessing probability
 library(zoo)
 library(tidyverse)
+library(expm)
 
 # result <- run_IE_sim(SwitchP = 0.1,
 #            ITI = 0,
@@ -374,7 +375,6 @@ markov_state <- function(mat_initial_state,
                          mat_transition,
                          n) {
   
-  library(expm)
   mat_initial_state %*% (mat_transition %^% n) %>%
     as.data.frame() %>%
     #rename(p_state_A = V1, p_state_A_detected = V2, p_state_B = V3) %>%
