@@ -1,7 +1,7 @@
 #v2: controlling for guessing probability
 library(zoo)
 library(tidyverse)
-library(expm)
+library(expm) 
 
 # result <- run_IE_sim(SwitchP = 0.1,
 #            ITI = 0,
